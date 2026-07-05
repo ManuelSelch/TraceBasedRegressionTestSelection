@@ -55,10 +55,12 @@ def main() -> None:
             json.dump(content, file, indent=2)
 
     print("\nSelection summary:")
+    max_change_id_len = max(len(change_id) for change_id in selection_results)
     for change_id, result in selection_results.items():
         print(
-            f"- {change_id}: {result['selected_count']}/{result['all_test_cases']} test cases selected "
-            f"(reduction rate: {result['reduction_rate']:.2%})"
+            f"- {change_id:<{max_change_id_len}}  "
+            f"{result['selected_count']:>2}/{result['all_test_cases']:<2} selected  "
+            f"reduction: {result['reduction_rate']:.2%}"
         )
 
     export(function_web)
