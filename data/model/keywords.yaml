@@ -34,3 +34,7 @@ keywords:
   - id: speed_sign
     description: Test exercises speed sign detection
     initial_ecus: [speed_sign_detector]
+
+  - id: acc
+    description: Test exercises adaptive cruise control
+    initial_ecus: [localization_fusion, radar, acc_module]

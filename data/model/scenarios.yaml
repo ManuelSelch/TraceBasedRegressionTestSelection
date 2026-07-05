@@ -73,7 +73,7 @@ scenarios:
 
   - id: lead_vehicle_braking
     description: Ego vehicle follows a lead vehicle that suddenly slows down
-    keywords: [camera, radar, localization]
+    keywords: [acc]
     active_features: [adaptive_cruise_control]
     parameters:
       ego_speed_kmh: [30, 90]
@@ -82,7 +82,7 @@ scenarios:
 
   - id: car_following
     description: Ego vehicle follows another vehicle at a safe distance over time
-    keywords: [radar, localization]
+    keywords: [acc]
     active_features: [adaptive_cruise_control]
     parameters:
       ego_speed_kmh: [30, 100]
