@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from src.graph_builder import build_function_web, generate_all_keyword_traces
+from src.selectors import (
+    build_ecu_to_test_cases_map,
+    generate_all_test_case_traces,
+    select_test_cases_for_all_changes,
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+MODEL_DIR = PROJECT_ROOT / "data" / "model"
+BENCHMARK_DIR = PROJECT_ROOT / "data" / "benchmark"
+OUT_DIR = PROJECT_ROOT / "out"
+
+
+
+def load_yaml(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
+
+
+
+def main() -> None:
+    ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]
+    signals = load_yaml(MODEL_DIR / "signals.yaml")["signals"]
+    keywords = load_yaml(MODEL_DIR / "keywords.yaml")["keywords"]
+    changes = load_yaml(MODEL_DIR / "changes.yaml")["changes"]
+    test_cases = load_yaml(BENCHMARK_DIR / "test_cases.yaml")["test_cases"]
+
+    function_web = build_function_web(ecus, signals)
+    keyword_traces = generate_all_keyword_traces(function_web, keywords)
+    test_case_traces = generate_all_test_case_traces(test_cases, keyword_traces)
+    ecu_to_test_cases = build_ecu_to_test_cases_map(test_case_traces)
+    selection_results = select_test_cases_for_all_changes(changes, test_case_traces)
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    outputs = {
+        "keyword_traces.json": keyword_traces,
+        "test_case_traces.json": test_case_traces,
+        "ecu_to_test_cases.json": ecu_to_test_cases,
+        "selection_results.json": selection_results,
+    }
+
+    for filename, content in outputs.items():
+        output_path = OUT_DIR / filename
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(content, file, indent=2)
+        print(f"Saved: {output_path}")
+
+    print("\nSelection summary:")
+    for change_id, result in selection_results.items():
+        print(
+            f"- {change_id}: {result['selected_count']}/{result['all_test_cases']} test cases selected "
+            f"(reduction rate: {result['reduction_rate']:.2%})"
+        )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import Any
 import networkx as nx
-import yaml
-from pathlib import Path
 
 ECU_KIND = "ecu"
 SIGNAL_KIND = "signal"
@@ -51,7 +49,6 @@ def build_function_web(ecus: list[dict[str, Any]], signals: list[dict[str, Any]]
 
     return graph
 
-
 def _add_ecu_nodes(graph: nx.DiGraph, ecus: list[dict[str, Any]]) -> None:
     for ecu in ecus:
         ecu_id = ecu["id"]
@@ -65,7 +62,6 @@ def _add_ecu_nodes(graph: nx.DiGraph, ecus: list[dict[str, Any]]) -> None:
             outputs=list(ecu.get("outputs", [])),
         )
 
-
 def _add_signal_nodes(graph: nx.DiGraph, signals: list[dict[str, Any]]) -> None:
     for signal in signals:
         signal_id = signal["id"]
@@ -77,7 +73,6 @@ def _add_signal_nodes(graph: nx.DiGraph, signals: list[dict[str, Any]]) -> None:
             consumers=list(signal.get("consumers", [])),
             description=signal.get("description"),
         )
-
 
 def _add_signal_edges(
     graph: nx.DiGraph,
@@ -106,7 +101,6 @@ def _add_signal_edges(
                     f"Signal '{signal_id}' references unknown consumer ECU '{consumer}'"
                 )
             graph.add_edge(signal_id, consumer, relation=CONSUMED_BY_RELATION)
-
 
 def generate_keyword_trace(
     graph: nx.DiGraph, keyword: dict[str, Any]
@@ -169,7 +163,6 @@ def generate_keyword_trace(
         "reached_edges": reached_edges,
     }
 
-
 def generate_all_keyword_traces(
     graph: nx.DiGraph, keywords: list[dict[str, Any]]
 ) -> dict[str, dict[str, Any]]:
@@ -177,18 +170,3 @@ def generate_all_keyword_traces(
         keyword["id"]: generate_keyword_trace(graph, keyword)
         for keyword in keywords
     }
-
-
-if __name__ == "__main__":
-    base = Path("data/model")     
-
-    with open(base / "ecus.yaml")       as f: ecus = yaml.safe_load(f)["ecus"]
-    with open(base / "signals.yaml")    as f: signals = yaml.safe_load(f)["signals"]
-    with open(base / "keywords.yaml")   as f: keywords = yaml.safe_load(f)["keywords"]
-
-    function_web = build_function_web(ecus, signals)
-    keyword_traces = generate_all_keyword_traces(function_web, keywords)
-
-    print("Nodes:", list(function_web.nodes(data=True)))
-    print("Edges:", list(function_web.edges(data=True)))
-    print("Keyword Traces:", keyword_traces["object_detection"])
