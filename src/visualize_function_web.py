@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import yaml
 from graphviz import Digraph
@@ -43,7 +43,7 @@ def _hex_to_rgb(color: str) -> tuple[int, int, int]:
     return int(color[0:2], 16), int(color[2:4], 16), int(color[4:6], 16)
 
 
-def _rgb_to_hex(rgb: tuple[int, int, int]) -> str:
+def _rgb_to_hex(rgb: Sequence[int]) -> str:
     return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
 
 
