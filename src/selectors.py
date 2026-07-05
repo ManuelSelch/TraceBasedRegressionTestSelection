@@ -19,10 +19,14 @@ def generate_test_case_trace(
     }
 
 def generate_all_test_case_traces(
-    test_cases: list[dict[str, Any]], keyword_traces: dict[str, dict[str, Any]]
+    test_cases: list[dict[str, Any]],
+    keyword_traces_by_scenario: dict[str, dict[str, dict[str, Any]]],
 ) -> dict[str, dict[str, Any]]:
     return {
-        test_case["id"]: generate_test_case_trace(test_case, keyword_traces)
+        test_case["id"]: generate_test_case_trace(
+            test_case,
+            keyword_traces_by_scenario[test_case["logical_scenario"]],
+        )
         for test_case in test_cases
     }
 

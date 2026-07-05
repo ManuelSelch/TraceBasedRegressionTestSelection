@@ -1,5 +1,8 @@
 from __future__ import annotations
+
+from collections import deque
 from typing import Any
+
 import networkx as nx
 
 ECU_KIND = "ecu"
@@ -20,23 +23,6 @@ def build_function_web(ecus: list[dict[str, Any]], signals: list[dict[str, Any]]
     Edges:
     - ECU -> Signal   (produces)
     - Signal -> ECU   (consumed_by)
-
-    Expected ECU shape:
-    {
-        "id": "planner",
-        "type": "processing",
-        "forwards_only": False,
-        "inputs": ["detected_objects", "ego_pose"],
-        "outputs": ["target_path"]
-    }
-
-    Expected Signal shape:
-    {
-        "id": "target_path",
-        "level": "planning",
-        "producer": "planner",
-        "consumers": ["controller"]
-    }
     """
     graph = nx.DiGraph(name="function_web")
 
@@ -49,6 +35,7 @@ def build_function_web(ecus: list[dict[str, Any]], signals: list[dict[str, Any]]
 
     return graph
 
+
 def _add_ecu_nodes(graph: nx.DiGraph, ecus: list[dict[str, Any]]) -> None:
     for ecu in ecus:
         ecu_id = ecu["id"]
@@ -60,7 +47,9 @@ def _add_ecu_nodes(graph: nx.DiGraph, ecus: list[dict[str, Any]]) -> None:
             description=ecu.get("description"),
             inputs=list(ecu.get("inputs", [])),
             outputs=list(ecu.get("outputs", [])),
+            required_features=list(ecu.get("required_features", [])),
         )
+
 
 def _add_signal_nodes(graph: nx.DiGraph, signals: list[dict[str, Any]]) -> None:
     for signal in signals:
@@ -73,6 +62,7 @@ def _add_signal_nodes(graph: nx.DiGraph, signals: list[dict[str, Any]]) -> None:
             consumers=list(signal.get("consumers", [])),
             description=signal.get("description"),
         )
+
 
 def _add_signal_edges(
     graph: nx.DiGraph,
@@ -102,14 +92,40 @@ def _add_signal_edges(
                 )
             graph.add_edge(signal_id, consumer, relation=CONSUMED_BY_RELATION)
 
+
+def _is_ecu_active(
+    graph: nx.DiGraph,
+    ecu_id: str,
+    active_features: set[str] | None,
+    enabled_features: set[str] | None,
+) -> bool:
+    required_features = set(graph.nodes[ecu_id].get("required_features", []))
+
+    if active_features is not None and not required_features.issubset(active_features):
+        return False
+
+    if enabled_features is not None and not required_features.issubset(enabled_features):
+        return False
+
+    return True
+
+
 def generate_keyword_trace(
-    graph: nx.DiGraph, keyword: dict[str, Any]
+    graph: nx.DiGraph,
+    keyword: dict[str, Any],
+    active_features: list[str] | set[str] | None = None,
+    enabled_features: list[str] | set[str] | None = None,
 ) -> dict[str, Any]:
     keyword_id = keyword["id"]
     initial_ecus = list(keyword.get("initial_ecus", []))
 
     if not initial_ecus:
         raise ValueError(f"Keyword '{keyword_id}' has no initial ECUs")
+
+    normalized_active_features = set(active_features) if active_features is not None else None
+    normalized_enabled_features = (
+        set(enabled_features) if enabled_features is not None else None
+    )
 
     for ecu_id in initial_ecus:
         if ecu_id not in graph:
@@ -121,9 +137,39 @@ def generate_keyword_trace(
                 f"Keyword '{keyword_id}' initial node '{ecu_id}' is not an ECU"
             )
 
-    distances = nx.multi_source_dijkstra_path_length(
-        graph, initial_ecus, weight=lambda _u, _v, _d: 1
-    )
+    distances: dict[str, int] = {}
+    queue: deque[str] = deque()
+
+    for ecu_id in initial_ecus:
+        if not _is_ecu_active(
+            graph,
+            ecu_id,
+            normalized_active_features,
+            normalized_enabled_features,
+        ):
+            continue
+
+        distances[ecu_id] = 0
+        queue.append(ecu_id)
+
+    while queue:
+        node_id = queue.popleft()
+        current_distance = distances[node_id]
+
+        for successor_id in graph.successors(node_id):
+            if graph.nodes[successor_id].get("kind") == ECU_KIND and not _is_ecu_active(
+                graph,
+                successor_id,
+                normalized_active_features,
+                normalized_enabled_features,
+            ):
+                continue
+
+            if successor_id in distances:
+                continue
+
+            distances[successor_id] = current_distance + 1
+            queue.append(successor_id)
 
     reached_ecus = sorted(
         node
@@ -156,6 +202,8 @@ def generate_keyword_trace(
     return {
         "keyword": keyword_id,
         "initial_ecus": sorted(initial_ecus),
+        "active_features": sorted(normalized_active_features or []),
+        "enabled_features": sorted(normalized_enabled_features or []),
         "direct_ecus": direct_ecus,
         "indirect_ecus": indirect_ecus,
         "reached_ecus": reached_ecus,
@@ -163,10 +211,19 @@ def generate_keyword_trace(
         "reached_edges": reached_edges,
     }
 
+
 def generate_all_keyword_traces(
-    graph: nx.DiGraph, keywords: list[dict[str, Any]]
+    graph: nx.DiGraph,
+    keywords: list[dict[str, Any]],
+    active_features: list[str] | set[str] | None = None,
+    enabled_features: list[str] | set[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     return {
-        keyword["id"]: generate_keyword_trace(graph, keyword)
+        keyword["id"]: generate_keyword_trace(
+            graph,
+            keyword,
+            active_features=active_features,
+            enabled_features=enabled_features,
+        )
         for keyword in keywords
     }

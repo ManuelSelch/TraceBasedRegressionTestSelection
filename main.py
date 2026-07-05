@@ -31,11 +31,19 @@ def main() -> None:
     ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]
     signals = load_yaml(MODEL_DIR / "signals.yaml")["signals"]
     keywords = load_yaml(MODEL_DIR / "keywords.yaml")["keywords"]
+    scenarios = load_yaml(MODEL_DIR / "scenarios.yaml")["scenarios"]
     changes = load_yaml(MODEL_DIR / "changes.yaml")["changes"]
     test_cases = load_yaml(BENCHMARK_DIR / "test_cases.yaml")["test_cases"]
 
     function_web = build_function_web(ecus, signals)
-    keyword_traces = generate_all_keyword_traces(function_web, keywords)
+    keyword_traces = {
+        scenario["id"]: generate_all_keyword_traces(
+            function_web,
+            keywords,
+            active_features=scenario.get("active_features", []),
+        )
+        for scenario in scenarios
+    }
     test_case_traces = generate_all_test_case_traces(test_cases, keyword_traces)
     ecu_to_test_cases = build_ecu_to_test_cases_map(test_case_traces)
     selection_results = select_test_cases_for_all_changes(changes, test_case_traces)

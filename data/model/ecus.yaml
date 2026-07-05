@@ -26,12 +26,14 @@ ecus:
   - id: ultrasonic
     type: sensor
     forwards_only: false
+    required_features: [parking_assist]
     description: Provides short-range distance measurements for parking
     outputs: [ultrasonic_ranges]
 
   - id: object_detector
     type: processing
     forwards_only: false
+    required_features: [object_perception]
     description: Extracts camera-based object detections
     inputs: [camera_image]
     outputs: [bounding_boxes]
@@ -39,6 +41,7 @@ ecus:
   - id: object_tracker
     type: processing
     forwards_only: false
+    required_features: [object_perception]
     description: Fuses camera and radar object observations over time
     inputs: [bounding_boxes, radar_detections]
     outputs: [tracked_objects]
@@ -46,6 +49,7 @@ ecus:
   - id: lane_perception
     type: processing
     forwards_only: false
+    required_features: [lane_perception]
     description: Extracts lane geometry from camera input
     inputs: [camera_image]
     outputs: [lane_boundaries]
@@ -53,6 +57,7 @@ ecus:
   - id: traffic_light_detector
     type: processing
     forwards_only: false
+    required_features: [traffic_light_recognition]
     description: Detects and classifies traffic lights from camera input
     inputs: [camera_image]
     outputs: [traffic_light_state]
@@ -60,6 +65,7 @@ ecus:
   - id: speed_sign_detector
     type: processing
     forwards_only: false
+    required_features: [speed_limit_recognition]
     description: Detects speed signs and estimates active speed limits
     inputs: [camera_image]
     outputs: [speed_limit]
@@ -88,6 +94,7 @@ ecus:
   - id: global_planner
     type: processing
     forwards_only: false
+    required_features: [navigation]
     description: Computes the high-level route to the destination
     inputs: [fused_ego_pose]
     outputs: [global_route]
@@ -95,6 +102,7 @@ ecus:
   - id: acc_module
     type: processing
     forwards_only: false
+    required_features: [adaptive_cruise_control]
     description: Computes adaptive cruise speed suggestions from tracked objects
     inputs: [tracked_objects, ego_velocity]
     outputs: [acc_target_speed]
@@ -102,6 +110,7 @@ ecus:
   - id: local_planner
     type: processing
     forwards_only: false
+    required_features: [local_motion_planning]
     description: Computes local motion targets from route, perception, and ego state
     inputs: [global_route, tracked_objects, lane_boundaries, traffic_light_state, speed_limit, fused_ego_pose, ego_velocity, acc_target_speed]
     outputs: [target_speed, target_curvature]
@@ -109,6 +118,7 @@ ecus:
   - id: parking_perception
     type: processing
     forwards_only: false
+    required_features: [parking_assist]
     description: Detects free parking slots using camera and ultrasonic sensors
     inputs: [camera_image, ultrasonic_ranges]
     outputs: [parking_slot_pose]
@@ -116,6 +126,7 @@ ecus:
   - id: parking_planner
     type: processing
     forwards_only: false
+    required_features: [parking_assist]
     description: Plans low-speed parking maneuvers into a target slot
     inputs: [parking_slot_pose, fused_ego_pose]
     outputs: [parking_target_speed, parking_target_curvature]
@@ -123,6 +134,7 @@ ecus:
   - id: steering_controller
     type: processing
     forwards_only: false
+    required_features: [steering_control]
     description: Converts target curvature to steering commands
     inputs: [target_curvature, parking_target_curvature]
     outputs: [steer_cmd]
@@ -130,6 +142,7 @@ ecus:
   - id: brake_controller
     type: processing
     forwards_only: false
+    required_features: [braking_control]
     description: Converts target speed to braking commands
     inputs: [target_speed, acc_target_speed, parking_target_speed]
     outputs: [brake_cmd]
