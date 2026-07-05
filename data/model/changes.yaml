@@ -1,0 +1,25 @@
+changes:
+  - id: planner_code_change
+    changed_ecus: [planner]
+    impacted_signals: [target_path, steer_cmd, brake_cmd]
+    description: Internal planner logic was updated
+
+  - id: camera_mount_height_change
+    changed_ecus: [camera]
+    impacted_signals: [camera_image, detected_objects, target_path, steer_cmd, brake_cmd]
+    description: Camera viewpoint changed due to sensor mounting variation
+
+  - id: perception_model_change
+    changed_ecus: [perception]
+    impacted_signals: [detected_objects, target_path, steer_cmd, brake_cmd]
+    description: New object detection model version
+
+  - id: localization_noise_model_change
+    changed_ecus: [localization]
+    impacted_signals: [ego_pose, target_path, steer_cmd, brake_cmd]
+    description: Localization output characteristics changed
+
+  - id: brake_controller_tuning_change
+    changed_ecus: [controller]
+    impacted_signals: [brake_cmd]
+    description: Brake controller tuning was modified

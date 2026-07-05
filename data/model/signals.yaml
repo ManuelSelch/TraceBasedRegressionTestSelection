@@ -1,0 +1,36 @@
+signals:
+  - id: camera_image
+    level: sensor
+    producer: camera
+    consumers: [perception]
+    description: Raw front camera image
+
+  - id: detected_objects
+    level: perception
+    producer: perception
+    consumers: [planner]
+    description: Perceived dynamic and static obstacles
+
+  - id: ego_pose
+    level: localization
+    producer: localization
+    consumers: [planner]
+    description: Estimated position and orientation of ego vehicle
+
+  - id: target_path
+    level: planning
+    producer: planner
+    consumers: [controller]
+    description: Planned path for the ego vehicle
+
+  - id: steer_cmd
+    level: control
+    producer: controller
+    consumers: []
+    description: Steering actuator command
+
+  - id: brake_cmd
+    level: control
+    producer: controller
+    consumers: []
+    description: Brake actuator command

@@ -1,0 +1,26 @@
+experiments:
+  - id: baseline_complete_model
+    description: Use all signals and dependencies as ground truth
+
+  - id: omit_detected_objects
+    description: Remove a high-level perception signal from the model
+    removed_signals: [detected_objects]
+
+  - id: omit_ego_pose
+    description: Remove localization output from the model
+    removed_signals: [ego_pose]
+
+  - id: omit_target_path
+    description: Remove planning output from the model
+    removed_signals: [target_path]
+
+  - id: omit_camera_to_perception_edge
+    description: Remove dependency between camera and perception
+    removed_edges:
+      - [camera_image, detected_objects]
+
+  - id: omit_planner_to_controller_edge
+    description: Remove dependency between planner and controller
+    removed_edges:
+      - [target_path, steer_cmd]
+      - [target_path, brake_cmd]

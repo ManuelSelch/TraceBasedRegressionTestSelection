@@ -1,0 +1,33 @@
+ecus:
+  - id: camera
+    type: sensor
+    forwards_only: false
+    description: Captures visual scene information
+    outputs: [camera_image]
+
+  - id: perception
+    type: processing
+    forwards_only: false
+    description: Extracts detected objects from camera input
+    inputs: [camera_image]
+    outputs: [detected_objects]
+
+  - id: localization
+    type: processing
+    forwards_only: false
+    description: Estimates ego vehicle pose
+    outputs: [ego_pose]
+
+  - id: planner
+    type: processing
+    forwards_only: false
+    description: Computes target path from environment and ego state
+    inputs: [detected_objects, ego_pose]
+    outputs: [target_path]
+
+  - id: controller
+    type: processing
+    forwards_only: false
+    description: Converts path to steering and braking commands
+    inputs: [target_path]
+    outputs: [steer_cmd, brake_cmd]
