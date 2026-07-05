@@ -12,7 +12,7 @@ from src.selectors import (
     generate_all_test_case_traces,
     select_test_cases_for_all_changes,
 )
-
+from src.visualize_function_web import export
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_DIR = PROJECT_ROOT / "data" / "model"
@@ -53,7 +53,6 @@ def main() -> None:
         output_path = OUT_DIR / filename
         with output_path.open("w", encoding="utf-8") as file:
             json.dump(content, file, indent=2)
-        print(f"Saved: {output_path}")
 
     print("\nSelection summary:")
     for change_id, result in selection_results.items():
@@ -62,6 +61,7 @@ def main() -> None:
             f"(reduction rate: {result['reduction_rate']:.2%})"
         )
 
+    export(function_web)
 
 if __name__ == "__main__":
     main()

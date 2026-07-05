@@ -5,12 +5,19 @@ ecus:
     description: Captures visual scene information
     outputs: [camera_image]
 
-  - id: perception
+  - id: object_perception
     type: processing
     forwards_only: false
-    description: Extracts detected objects from camera input
+    description: Extracts object-level perception outputs from camera input
     inputs: [camera_image]
-    outputs: [detected_objects]
+    outputs: [bounding_boxes, tracked_objects]
+
+  - id: lane_perception
+    type: processing
+    forwards_only: false
+    description: Extracts lane structure from camera input
+    inputs: [camera_image]
+    outputs: [lane_boundaries]
 
   - id: localization
     type: processing
@@ -21,13 +28,20 @@ ecus:
   - id: planner
     type: processing
     forwards_only: false
-    description: Computes target path from environment and ego state
-    inputs: [detected_objects, ego_pose]
-    outputs: [target_path]
+    description: Computes low-level planning targets from perception and ego state
+    inputs: [tracked_objects, lane_boundaries, ego_pose]
+    outputs: [target_speed, target_curvature]
 
-  - id: controller
+  - id: steering_controller
     type: processing
     forwards_only: false
-    description: Converts path to steering and braking commands
-    inputs: [target_path]
-    outputs: [steer_cmd, brake_cmd]
+    description: Converts target curvature to steering commands
+    inputs: [target_curvature]
+    outputs: [steer_cmd]
+
+  - id: brake_controller
+    type: processing
+    forwards_only: false
+    description: Converts target speed to braking commands
+    inputs: [target_speed]
+    outputs: [brake_cmd]

@@ -1,21 +1,21 @@
 test_cases:
   - id: TC001
     logical_scenario: lane_following
-    keywords: [localization, path_planning, steering_control]
+    keywords: [lane_detection, localization, path_planning, steering_control]
     seed_parameters:
       road_curvature: low
       ego_speed_kmh: 30
 
   - id: TC002
     logical_scenario: lane_following
-    keywords: [localization, path_planning, steering_control]
+    keywords: [lane_detection, localization, path_planning, steering_control]
     seed_parameters:
       road_curvature: medium
       ego_speed_kmh: 55
 
   - id: TC003
     logical_scenario: pedestrian_crossing
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 30
       pedestrian_speed_ms: 1.2
@@ -24,7 +24,7 @@ test_cases:
 
   - id: TC004
     logical_scenario: pedestrian_crossing
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 45
       pedestrian_speed_ms: 1.8
@@ -33,7 +33,7 @@ test_cases:
 
   - id: TC005
     logical_scenario: static_obstacle
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 40
       obstacle_distance_m: 20
@@ -41,7 +41,7 @@ test_cases:
 
   - id: TC006
     logical_scenario: static_obstacle
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 65
       obstacle_distance_m: 12
@@ -49,7 +49,7 @@ test_cases:
 
   - id: TC007
     logical_scenario: merge_into_traffic
-    keywords: [object_detection, localization, path_planning, steering_control, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, steering_control, braking]
     seed_parameters:
       ego_speed_kmh: 50
       target_lane_gap_m: 15
@@ -57,7 +57,7 @@ test_cases:
 
   - id: TC008
     logical_scenario: merge_into_traffic
-    keywords: [object_detection, localization, path_planning, steering_control, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, steering_control, braking]
     seed_parameters:
       ego_speed_kmh: 70
       target_lane_gap_m: 8
@@ -65,7 +65,7 @@ test_cases:
 
   - id: TC009
     logical_scenario: intersection_approach
-    keywords: [object_detection, localization, path_planning, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 35
       crossing_vehicle_speed_kmh: 30
@@ -73,7 +73,7 @@ test_cases:
 
   - id: TC010
     logical_scenario: intersection_approach
-    keywords: [object_detection, localization, path_planning, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, braking]
     seed_parameters:
       ego_speed_kmh: 55
       crossing_vehicle_speed_kmh: 50

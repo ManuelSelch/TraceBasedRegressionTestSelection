@@ -1,25 +1,35 @@
 changes:
   - id: planner_code_change
     changed_ecus: [planner]
-    impacted_signals: [target_path, steer_cmd, brake_cmd]
+    impacted_signals: [target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Internal planner logic was updated
 
   - id: camera_mount_height_change
     changed_ecus: [camera]
-    impacted_signals: [camera_image, detected_objects, target_path, steer_cmd, brake_cmd]
+    impacted_signals: [camera_image, bounding_boxes, tracked_objects, lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Camera viewpoint changed due to sensor mounting variation
 
-  - id: perception_model_change
-    changed_ecus: [perception]
-    impacted_signals: [detected_objects, target_path, steer_cmd, brake_cmd]
-    description: New object detection model version
+  - id: object_perception_model_change
+    changed_ecus: [object_perception]
+    impacted_signals: [bounding_boxes, tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: New object perception model version
+
+  - id: lane_perception_model_change
+    changed_ecus: [lane_perception]
+    impacted_signals: [lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: New lane perception model version
 
   - id: localization_noise_model_change
     changed_ecus: [localization]
-    impacted_signals: [ego_pose, target_path, steer_cmd, brake_cmd]
+    impacted_signals: [ego_pose, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Localization output characteristics changed
 
+  - id: steering_controller_tuning_change
+    changed_ecus: [steering_controller]
+    impacted_signals: [steer_cmd]
+    description: Steering controller tuning was modified
+
   - id: brake_controller_tuning_change
-    changed_ecus: [controller]
+    changed_ecus: [brake_controller]
     impacted_signals: [brake_cmd]
     description: Brake controller tuning was modified

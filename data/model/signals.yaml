@@ -2,14 +2,26 @@ signals:
   - id: camera_image
     level: sensor
     producer: camera
-    consumers: [perception]
+    consumers: [object_perception, lane_perception]
     description: Raw front camera image
 
-  - id: detected_objects
+  - id: bounding_boxes
     level: perception
-    producer: perception
+    producer: object_perception
+    consumers: []
+    description: Raw object detections before temporal fusion
+
+  - id: tracked_objects
+    level: perception
+    producer: object_perception
     consumers: [planner]
-    description: Perceived dynamic and static obstacles
+    description: Temporally fused object tracks
+
+  - id: lane_boundaries
+    level: perception
+    producer: lane_perception
+    consumers: [planner]
+    description: Estimated lane boundary geometry
 
   - id: ego_pose
     level: localization
@@ -17,20 +29,26 @@ signals:
     consumers: [planner]
     description: Estimated position and orientation of ego vehicle
 
-  - id: target_path
+  - id: target_speed
     level: planning
     producer: planner
-    consumers: [controller]
-    description: Planned path for the ego vehicle
+    consumers: [brake_controller]
+    description: Planned longitudinal speed target
+
+  - id: target_curvature
+    level: planning
+    producer: planner
+    consumers: [steering_controller]
+    description: Planned lateral curvature target
 
   - id: steer_cmd
     level: control
-    producer: controller
+    producer: steering_controller
     consumers: []
     description: Steering actuator command
 
   - id: brake_cmd
     level: control
-    producer: controller
+    producer: brake_controller
     consumers: []
     description: Brake actuator command

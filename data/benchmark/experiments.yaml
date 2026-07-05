@@ -2,25 +2,36 @@ experiments:
   - id: baseline_complete_model
     description: Use all signals and dependencies as ground truth
 
-  - id: omit_detected_objects
-    description: Remove a high-level perception signal from the model
-    removed_signals: [detected_objects]
+  - id: omit_camera_image
+    description: Remove the raw sensor image signal from the model
+    removed_signals: [camera_image]
 
-  - id: omit_ego_pose
-    description: Remove localization output from the model
-    removed_signals: [ego_pose]
+  - id: omit_bounding_boxes
+    description: Remove low-level object detections from the model
+    removed_signals: [bounding_boxes]
 
-  - id: omit_target_path
-    description: Remove planning output from the model
-    removed_signals: [target_path]
+  - id: omit_tracked_objects
+    description: Remove temporally fused object tracks from the model
+    removed_signals: [tracked_objects]
 
-  - id: omit_camera_to_perception_edge
-    description: Remove dependency between camera and perception
+  - id: omit_lane_boundaries
+    description: Remove lane geometry estimation from the model
+    removed_signals: [lane_boundaries]
+
+  - id: omit_target_speed
+    description: Remove longitudinal planning output from the model
+    removed_signals: [target_speed]
+
+  - id: omit_target_curvature
+    description: Remove lateral planning output from the model
+    removed_signals: [target_curvature]
+
+  - id: omit_camera_to_object_perception_edge
+    description: Remove dependency between camera and object perception
     removed_edges:
-      - [camera_image, detected_objects]
+      - [camera_image, object_perception]
 
-  - id: omit_planner_to_controller_edge
-    description: Remove dependency between planner and controller
+  - id: omit_planner_to_brake_controller_edge
+    description: Remove dependency between planner and brake controller
     removed_edges:
-      - [target_path, steer_cmd]
-      - [target_path, brake_cmd]
+      - [target_speed, brake_controller]

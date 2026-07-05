@@ -1,14 +1,14 @@
 scenarios:
   - id: lane_following
     description: Ego vehicle follows its lane without relevant obstacles ahead
-    keywords: [localization, path_planning, steering_control]
+    keywords: [lane_detection, localization, path_planning, steering_control]
     parameters:
       road_curvature: [low, medium]
       ego_speed_kmh: [20, 60]
 
   - id: pedestrian_crossing
     description: Pedestrian crosses the ego lane in front of the vehicle
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     parameters:
       ego_speed_kmh: [20, 50]
       pedestrian_speed_ms: [0.5, 2.0]
@@ -17,7 +17,7 @@ scenarios:
 
   - id: static_obstacle
     description: Static obstacle blocks the ego lane
-    keywords: [object_detection, path_planning, braking]
+    keywords: [object_detection, lane_detection, path_planning, braking]
     parameters:
       ego_speed_kmh: [20, 70]
       obstacle_distance_m: [8, 40]
@@ -25,7 +25,7 @@ scenarios:
 
   - id: merge_into_traffic
     description: Ego vehicle merges into a lane occupied by other traffic participants
-    keywords: [object_detection, localization, path_planning, steering_control, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, steering_control, braking]
     parameters:
       ego_speed_kmh: [30, 80]
       target_lane_gap_m: [5, 25]
@@ -33,7 +33,7 @@ scenarios:
 
   - id: intersection_approach
     description: Ego vehicle approaches an intersection with crossing traffic
-    keywords: [object_detection, localization, path_planning, braking]
+    keywords: [object_detection, lane_detection, localization, path_planning, braking]
     parameters:
       ego_speed_kmh: [20, 60]
       crossing_vehicle_speed_kmh: [10, 70]

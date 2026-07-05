@@ -3,18 +3,22 @@ keywords:
     description: Test exercises the ability to detect relevant road users or obstacles
     initial_ecus: [camera]
 
+  - id: lane_detection
+    description: Test exercises perception of lane structure
+    initial_ecus: [camera]
+
   - id: localization
     description: Test exercises ego state estimation
     initial_ecus: [localization]
 
   - id: path_planning
-    description: Test exercises path computation under scenario constraints
+    description: Test exercises low-level planning target computation
     initial_ecus: [planner]
 
   - id: steering_control
     description: Test exercises lateral control behavior
-    initial_ecus: [controller]
+    initial_ecus: [steering_controller]
 
   - id: braking
     description: Test exercises longitudinal stop or slow-down behavior
-    initial_ecus: [controller]
+    initial_ecus: [brake_controller]

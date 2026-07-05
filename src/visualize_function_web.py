@@ -33,3 +33,10 @@ def build_dot(graph) -> Digraph:
         dot.edge(source, target, label=attrs.get("relation", ""))
 
     return dot
+
+def export(graph) -> None:
+    dot = build_dot(graph)
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_base = OUT_DIR / "function_web"
+    dot.render(str(output_base), format="png", cleanup=False)
