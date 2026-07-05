@@ -7,14 +7,30 @@ keywords:
     description: Test exercises radar-based inputs used in the scenario
     initial_ecus: [radar]
 
+  - id: parking
+    description: Test exercises parking scenarios
+    initial_ecus: [ultrasonic, parking_perception, localization_fusion]
+
   - id: gps
-    description: Test exercises GPS-based localization inputs
-    initial_ecus: [gps]
+    description: Test exercises localization inputs
+    initial_ecus: [gps, odometry]
 
   - id: odometry
-    description: Test exercises odometry-based localization inputs
-    initial_ecus: [odometry]
+    description: Test exercises localization inputs
+    initial_ecus: [gps, odometry]
 
-  - id: ultrasonic
-    description: Test exercises ultrasonic sensing used in parking scenarios
-    initial_ecus: [ultrasonic]
+  - id: localization
+    description: Test exercises localization inputs
+    initial_ecus: [localization_fusion]
+
+  - id: lane
+    description: Test exercises lane following
+    initial_ecus: [lane_perception]
+
+  - id: traffic_light
+    description: Test exercises traffic light detection
+    initial_ecus: [traffic_light_detector, object_detector, lane_perception]
+
+  - id: speed_sign
+    description: Test exercises speed sign detection
+    initial_ecus: [speed_sign_detector]
