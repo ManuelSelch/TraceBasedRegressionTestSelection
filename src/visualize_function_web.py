@@ -250,6 +250,7 @@ def export(
 def collect_change_view(
     change_id: str,
     selection_results: dict[str, Any],
+    scenarios_by_id: dict[str, dict[str, Any]],
     test_cases: list[dict[str, Any]],
     keyword_traces_by_scenario: dict[str, dict[str, dict[str, Any]]],
 ) -> dict[str, Any]:
@@ -265,9 +266,10 @@ def collect_change_view(
     for test_case_id in result["selected_test_cases"]:
         test_case = test_cases_by_id[test_case_id]
         scenario_id = test_case["logical_scenario"]
+        scenario = scenarios_by_id[scenario_id]
         scenario_keyword_traces = keyword_traces_by_scenario[scenario_id]
 
-        for keyword_id in test_case.get("keywords", []):
+        for keyword_id in scenario.get("keywords", []):
             trace = scenario_keyword_traces[keyword_id]
             active_ecus.update(trace.get("reached_ecus", []))
             active_signals.update(trace.get("reached_signals", []))
@@ -297,6 +299,7 @@ def collect_ecu_coverage(test_case_traces: dict[str, dict[str, Any]]) -> tuple[d
 def export_change_view(change_id: str) -> None:
     ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]
     signals = load_yaml(MODEL_DIR / "signals.yaml")["signals"]
+    scenarios = load_yaml(MODEL_DIR / "scenarios.yaml")["scenarios"]
     test_cases = load_yaml(BENCHMARK_DIR / "test_cases.yaml")["test_cases"]
     selection_results = load_json(OUT_DIR / "selection_results.json")
     keyword_traces_by_scenario = load_json(OUT_DIR / "keyword_traces.json")
@@ -305,6 +308,7 @@ def export_change_view(change_id: str) -> None:
     change_view = collect_change_view(
         change_id,
         selection_results,
+        {scenario["id"]: scenario for scenario in scenarios},
         test_cases,
         keyword_traces_by_scenario,
     )

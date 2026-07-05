@@ -35,6 +35,8 @@ def main() -> None:
     changes = load_yaml(MODEL_DIR / "changes.yaml")["changes"]
     test_cases = load_yaml(BENCHMARK_DIR / "test_cases.yaml")["test_cases"]
 
+    scenarios_by_id = {scenario["id"]: scenario for scenario in scenarios}
+
     function_web = build_function_web(ecus, signals)
     keyword_traces = {
         scenario["id"]: generate_all_keyword_traces(
@@ -44,7 +46,11 @@ def main() -> None:
         )
         for scenario in scenarios
     }
-    test_case_traces = generate_all_test_case_traces(test_cases, keyword_traces)
+    test_case_traces = generate_all_test_case_traces(
+        test_cases,
+        scenarios_by_id,
+        keyword_traces,
+    )
     ecu_to_test_cases = build_ecu_to_test_cases_map(test_case_traces)
     selection_results = select_test_cases_for_all_changes(changes, test_case_traces)
 

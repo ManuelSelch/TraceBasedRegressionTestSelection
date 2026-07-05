@@ -2,11 +2,14 @@ from __future__ import annotations
 from typing import Any
 
 def generate_test_case_trace(
-    test_case: dict[str, Any], keyword_traces: dict[str, dict[str, Any]]
+    test_case: dict[str, Any],
+    scenario: dict[str, Any],
+    keyword_traces: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     reached_ecus: set[str] = set()
+    keywords = list(scenario.get("keywords", []))
 
-    for keyword_id in test_case.get("keywords", []):
+    for keyword_id in keywords:
         if keyword_id not in keyword_traces:
             raise ValueError(f"Unknown keyword trace: '{keyword_id}'")
         reached_ecus.update(keyword_traces[keyword_id]["reached_ecus"])
@@ -14,17 +17,19 @@ def generate_test_case_trace(
     return {
         "test_case": test_case["id"],
         "logical_scenario": test_case["logical_scenario"],
-        "keywords": list(test_case.get("keywords", [])),
+        "keywords": keywords,
         "reached_ecus": sorted(reached_ecus),
     }
 
 def generate_all_test_case_traces(
     test_cases: list[dict[str, Any]],
+    scenarios_by_id: dict[str, dict[str, Any]],
     keyword_traces_by_scenario: dict[str, dict[str, dict[str, Any]]],
 ) -> dict[str, dict[str, Any]]:
     return {
         test_case["id"]: generate_test_case_trace(
             test_case,
+            scenarios_by_id[test_case["logical_scenario"]],
             keyword_traces_by_scenario[test_case["logical_scenario"]],
         )
         for test_case in test_cases
