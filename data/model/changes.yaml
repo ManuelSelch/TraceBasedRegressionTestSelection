@@ -1,72 +1,72 @@
 changes:
-  - id: camera_sensor_change
+  - id: camera
     changed_ecus: [camera]
     description: Camera hardware or calibration changed
 
-  - id: radar_sensor_change
+  - id: radar
     changed_ecus: [radar]
     description: Radar hardware or calibration changed
 
-  - id: ultrasonic_sensor_change
+  - id: ultrasonic
     changed_ecus: [ultrasonic]
     description: Ultrasonic sensor characteristics changed
 
-  - id: gps_noise_model_change
+  - id: gps_noise_model
     changed_ecus: [gps, gps_processor]
     description: GPS measurement characteristics changed
 
-  - id: odometry_drift_change
+  - id: odometry_drift
     changed_ecus: [odometry, odometry_processor]
     description: Odometry drift characteristics changed
 
-  - id: localization_fusion_change
+  - id: localization_fusion
     changed_ecus: [localization_fusion]
     description: Sensor-fusion localization logic changed
 
-  - id: object_detector_change
+  - id: object_detector
     changed_ecus: [object_detector]
     description: Camera-based object detector changed
 
-  - id: object_tracker_change
+  - id: object_tracker
     changed_ecus: [object_tracker]
     description: Object tracker or fusion logic changed
 
-  - id: lane_perception_change
+  - id: lane_perception
     changed_ecus: [lane_perception]
     description: Lane detection or lane geometry estimation changed
 
-  - id: traffic_light_detector_change
+  - id: traffic_light_detector
     changed_ecus: [traffic_light_detector]
     description: Traffic light recognition changed
 
-  - id: speed_sign_detector_change
+  - id: speed_sign_detector
     changed_ecus: [speed_sign_detector]
     description: Speed sign recognition changed
 
-  - id: global_planner_change
+  - id: global_planner
     changed_ecus: [global_planner]
     description: High-level route planner changed
 
-  - id: acc_module_change
+  - id: acc_module
     changed_ecus: [acc_module]
     description: Adaptive cruise control logic changed
 
-  - id: local_planner_change
+  - id: local_planner
     changed_ecus: [local_planner]
     description: Local motion planner changed
 
-  - id: parking_perception_change
+  - id: parking_perception
     changed_ecus: [parking_perception]
     description: Parking slot detection logic changed
 
-  - id: parking_planner_change
+  - id: parking_planner
     changed_ecus: [parking_planner]
     description: Parking maneuver planner changed
 
-  - id: steering_controller_change
+  - id: steering_controller
     changed_ecus: [steering_controller]
     description: Steering controller tuning changed
 
-  - id: brake_controller_change
+  - id: brake_controller
     changed_ecus: [brake_controller]
     description: Brake controller tuning changed

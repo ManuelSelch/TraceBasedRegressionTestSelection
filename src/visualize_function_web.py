@@ -24,6 +24,8 @@ CHANGED_FILL = "#ff9aa2"
 INACTIVE_EDGE_COLOR = "#d0d0d0"
 ACTIVE_EDGE_COLOR = "#444444"
 CHANGED_BORDER_COLOR = "#cc0000"
+COVERAGE_MIN_FILL = "#deebf7"
+COVERAGE_MAX_FILL = "#08519c"
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -36,6 +38,26 @@ def load_json(path: Path) -> dict[str, Any]:
         return json.load(file)
 
 
+def _hex_to_rgb(color: str) -> tuple[int, int, int]:
+    color = color.lstrip("#")
+    return int(color[0:2], 16), int(color[2:4], 16), int(color[4:6], 16)
+
+
+def _rgb_to_hex(rgb: tuple[int, int, int]) -> str:
+    return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+
+def _interpolate_color(start: str, end: str, ratio: float) -> str:
+    ratio = max(0.0, min(1.0, ratio))
+    start_rgb = _hex_to_rgb(start)
+    end_rgb = _hex_to_rgb(end)
+    mixed = tuple(
+        round(start_channel + (end_channel - start_channel) * ratio)
+        for start_channel, end_channel in zip(start_rgb, end_rgb)
+    )
+    return _rgb_to_hex(mixed)
+
+
 def build_dot(
     graph,
     *,
@@ -43,12 +65,16 @@ def build_dot(
     active_signals: set[str] | None = None,
     active_edges: set[tuple[str, str]] | None = None,
     changed_ecus: set[str] | None = None,
+    ecu_coverage_counts: dict[str, int] | None = None,
+    total_test_cases: int = 0,
     title: str | None = None,
 ) -> Digraph:
     active_ecus = active_ecus or set()
     active_signals = active_signals or set()
     active_edges = active_edges or set()
     changed_ecus = changed_ecus or set()
+    ecu_coverage_counts = ecu_coverage_counts or {}
+    is_coverage_mode = bool(ecu_coverage_counts)
 
     dot = Digraph("function_web")
     dot.attr(rankdir="LR", nodesep="0.8", ranksep="1.2")
@@ -63,11 +89,22 @@ def build_dot(
         is_ecu = attrs.get("kind") == ECU_KIND
         is_active = node in active_ecus if is_ecu else node in active_signals
         is_changed = is_ecu and node in changed_ecus
+        label = node
+        fontcolor = "black"
 
         if is_changed:
             fillcolor = CHANGED_FILL
             color = CHANGED_BORDER_COLOR
             penwidth = "2.5"
+        elif is_coverage_mode and is_ecu:
+            count = ecu_coverage_counts.get(node, 0)
+            ratio = count / total_test_cases if total_test_cases else 0.0
+            fillcolor = _interpolate_color(COVERAGE_MIN_FILL, COVERAGE_MAX_FILL, ratio)
+            color = "black"
+            penwidth = "1.2"
+            label = f"{node}\n{count}/{total_test_cases}"
+            if ratio >= 0.55:
+                fontcolor = "white"
         elif is_active:
             fillcolor = ACTIVE_ECU_FILL if is_ecu else ACTIVE_SIGNAL_FILL
             color = "black"
@@ -81,10 +118,12 @@ def build_dot(
 
         dot.node(
             node,
+            label=label,
             shape="box" if is_ecu else "ellipse",
             fillcolor=fillcolor,
             color=color,
             penwidth=penwidth,
+            fontcolor=fontcolor,
         )
 
     for source, target, attrs in sorted(graph.edges(data=True)):
@@ -108,6 +147,8 @@ def export(
     active_signals: set[str] | None = None,
     active_edges: set[tuple[str, str]] | None = None,
     changed_ecus: set[str] | None = None,
+    ecu_coverage_counts: dict[str, int] | None = None,
+    total_test_cases: int = 0,
     title: str | None = None,
 ) -> None:
     dot = build_dot(
@@ -116,6 +157,8 @@ def export(
         active_signals=active_signals,
         active_edges=active_edges,
         changed_ecus=changed_ecus,
+        ecu_coverage_counts=ecu_coverage_counts,
+        total_test_cases=total_test_cases,
         title=title,
     )
 
@@ -164,6 +207,16 @@ def collect_change_view(
     }
 
 
+def collect_ecu_coverage(test_case_traces: dict[str, dict[str, Any]]) -> tuple[dict[str, int], int]:
+    ecu_coverage_counts: dict[str, int] = {}
+
+    for trace in test_case_traces.values():
+        for ecu_id in trace.get("reached_ecus", []):
+            ecu_coverage_counts[ecu_id] = ecu_coverage_counts.get(ecu_id, 0) + 1
+
+    return ecu_coverage_counts, len(test_case_traces)
+
+
 def export_change_view(change_id: str) -> None:
     ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]
     signals = load_yaml(MODEL_DIR / "signals.yaml")["signals"]
@@ -194,13 +247,39 @@ def export_change_view(change_id: str) -> None:
     )
 
 
+def export_coverage_view() -> None:
+    ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]
+    signals = load_yaml(MODEL_DIR / "signals.yaml")["signals"]
+    test_case_traces = load_json(OUT_DIR / "test_case_traces.json")
+
+    function_web = build_function_web(ecus, signals)
+    ecu_coverage_counts, total_test_cases = collect_ecu_coverage(test_case_traces)
+
+    export(
+        function_web,
+        output_name="function_web_coverage",
+        ecu_coverage_counts=ecu_coverage_counts,
+        total_test_cases=total_test_cases,
+        title=f"ECU coverage by test cases ({total_test_cases} total tests)",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--change", help="Render highlighted view for a specific change id")
+    parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Render ECU coverage counts across all test cases",
+    )
     args = parser.parse_args()
 
     if args.change:
         export_change_view(args.change)
+        return
+
+    if args.coverage:
+        export_coverage_view()
         return
 
     ecus = load_yaml(MODEL_DIR / "ecus.yaml")["ecus"]

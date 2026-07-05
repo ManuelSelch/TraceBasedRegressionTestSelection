@@ -3,5 +3,6 @@
 
 
 ```bash
-python3 -m src.visualize_function_web --change parking_perception_change
+python3 -m src.visualize_function_web --coverage
+python3 -m src.visualize_function_web --change parking_perception
 ```
