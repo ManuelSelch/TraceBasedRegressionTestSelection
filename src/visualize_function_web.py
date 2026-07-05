@@ -8,7 +8,7 @@ from typing import Any
 import yaml
 from graphviz import Digraph
 
-from src.graph_builder import ECU_KIND, build_function_web
+from src.graph_builder import ECU_KIND, SIGNAL_KIND, build_function_web
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODEL_DIR = PROJECT_ROOT / "data" / "model"
@@ -16,16 +16,16 @@ BENCHMARK_DIR = PROJECT_ROOT / "data" / "benchmark"
 OUT_DIR = PROJECT_ROOT / "out"
 
 ECU_FILL = "lightblue"
-SIGNAL_FILL = "orange"
 INACTIVE_FILL = "#f2f2f2"
 ACTIVE_ECU_FILL = "#9be9a8"
-ACTIVE_SIGNAL_FILL = "#ffd58a"
 CHANGED_FILL = "#ff9aa2"
 INACTIVE_EDGE_COLOR = "#d0d0d0"
 ACTIVE_EDGE_COLOR = "#444444"
 CHANGED_BORDER_COLOR = "#cc0000"
 COVERAGE_MIN_FILL = "#deebf7"
 COVERAGE_MAX_FILL = "#08519c"
+SINK_NODE_FILL = "#fff7bc"
+SINK_NODE_COLOR = "#b8860b"
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -58,12 +58,67 @@ def _interpolate_color(start: str, end: str, ratio: float) -> str:
     return _rgb_to_hex(mixed)
 
 
+def _build_visual_edges(graph) -> tuple[dict[tuple[str, str], list[str]], dict[str, str]]:
+    ecu_edges: dict[tuple[str, str], list[str]] = {}
+    sink_signals: dict[str, str] = {}
+
+    for signal_id, attrs in sorted(graph.nodes(data=True)):
+        if attrs.get("kind") != SIGNAL_KIND:
+            continue
+
+        producers = [node for node in graph.predecessors(signal_id) if graph.nodes[node].get("kind") == ECU_KIND]
+        consumers = [node for node in graph.successors(signal_id) if graph.nodes[node].get("kind") == ECU_KIND]
+
+        if not producers:
+            continue
+
+        producer = producers[0]
+
+        if consumers:
+            for consumer in consumers:
+                ecu_edges.setdefault((producer, consumer), []).append(signal_id)
+        else:
+            sink_signals[signal_id] = producer
+
+    for edge_key in ecu_edges:
+        ecu_edges[edge_key] = sorted(ecu_edges[edge_key])
+
+    return ecu_edges, sink_signals
+
+
+def _build_active_visual_edges(
+    graph,
+    active_signals: set[str],
+) -> tuple[set[tuple[str, str]], set[str]]:
+    active_ecu_edges: set[tuple[str, str]] = set()
+    active_sink_signals: set[str] = set()
+
+    for signal_id in active_signals:
+        if signal_id not in graph or graph.nodes[signal_id].get("kind") != SIGNAL_KIND:
+            continue
+
+        producers = [node for node in graph.predecessors(signal_id) if graph.nodes[node].get("kind") == ECU_KIND]
+        consumers = [node for node in graph.successors(signal_id) if graph.nodes[node].get("kind") == ECU_KIND]
+
+        if not producers:
+            continue
+
+        producer = producers[0]
+
+        if consumers:
+            for consumer in consumers:
+                active_ecu_edges.add((producer, consumer))
+        else:
+            active_sink_signals.add(signal_id)
+
+    return active_ecu_edges, active_sink_signals
+
+
 def build_dot(
     graph,
     *,
     active_ecus: set[str] | None = None,
     active_signals: set[str] | None = None,
-    active_edges: set[tuple[str, str]] | None = None,
     changed_ecus: set[str] | None = None,
     ecu_coverage_counts: dict[str, int] | None = None,
     total_test_cases: int = 0,
@@ -71,10 +126,13 @@ def build_dot(
 ) -> Digraph:
     active_ecus = active_ecus or set()
     active_signals = active_signals or set()
-    active_edges = active_edges or set()
     changed_ecus = changed_ecus or set()
     ecu_coverage_counts = ecu_coverage_counts or {}
     is_coverage_mode = bool(ecu_coverage_counts)
+
+    visual_edges, sink_signals = _build_visual_edges(graph)
+    active_visual_edges, active_sink_signals = _build_active_visual_edges(graph, active_signals)
+    has_active_view = bool(active_ecus or active_signals)
 
     dot = Digraph("function_web")
     dot.attr(rankdir="LR", nodesep="0.8", ranksep="1.2")
@@ -86,9 +144,11 @@ def build_dot(
         dot.attr(label=title, labelloc="t", fontsize="20")
 
     for node, attrs in sorted(graph.nodes(data=True)):
-        is_ecu = attrs.get("kind") == ECU_KIND
-        is_active = node in active_ecus if is_ecu else node in active_signals
-        is_changed = is_ecu and node in changed_ecus
+        if attrs.get("kind") != ECU_KIND:
+            continue
+
+        is_active = node in active_ecus
+        is_changed = node in changed_ecus
         label = node
         fontcolor = "black"
 
@@ -96,7 +156,7 @@ def build_dot(
             fillcolor = CHANGED_FILL
             color = CHANGED_BORDER_COLOR
             penwidth = "2.5"
-        elif is_coverage_mode and is_ecu:
+        elif is_coverage_mode:
             count = ecu_coverage_counts.get(node, 0)
             ratio = count / total_test_cases if total_test_cases else 0.0
             fillcolor = _interpolate_color(COVERAGE_MIN_FILL, COVERAGE_MAX_FILL, ratio)
@@ -106,33 +166,55 @@ def build_dot(
             if ratio >= 0.55:
                 fontcolor = "white"
         elif is_active:
-            fillcolor = ACTIVE_ECU_FILL if is_ecu else ACTIVE_SIGNAL_FILL
+            fillcolor = ACTIVE_ECU_FILL
             color = "black"
             penwidth = "1.5"
         else:
-            fillcolor = ECU_FILL if is_ecu and not active_ecus and not active_signals else INACTIVE_FILL
-            if not is_ecu and not active_ecus and not active_signals:
-                fillcolor = SIGNAL_FILL
-            color = "#999999" if active_ecus or active_signals else "black"
+            fillcolor = ECU_FILL if not has_active_view else INACTIVE_FILL
+            color = "black" if not has_active_view else "#999999"
             penwidth = "1.0"
 
         dot.node(
             node,
             label=label,
-            shape="box" if is_ecu else "ellipse",
+            shape="box",
             fillcolor=fillcolor,
             color=color,
             penwidth=penwidth,
             fontcolor=fontcolor,
         )
 
-    for source, target, attrs in sorted(graph.edges(data=True)):
-        is_active_edge = (source, target) in active_edges
+    for signal_id, producer in sorted(sink_signals.items()):
+        sink_node_id = f"__sink__{signal_id}"
+        is_active = signal_id in active_sink_signals
+        fillcolor = SINK_NODE_FILL if not has_active_view or is_active else INACTIVE_FILL
+        color = SINK_NODE_COLOR if not has_active_view or is_active else "#999999"
+        fontcolor = "black" if not has_active_view or is_active else "#999999"
+
+        dot.node(
+            sink_node_id,
+            label=signal_id,
+            shape="ellipse",
+            fillcolor=fillcolor,
+            color=color,
+            penwidth="1.2",
+            fontcolor=fontcolor,
+        )
         dot.edge(
-            source,
-            target,
-            label=attrs.get("relation", ""),
-            color=ACTIVE_EDGE_COLOR if is_active_edge or not active_edges else INACTIVE_EDGE_COLOR,
+            producer,
+            sink_node_id,
+            color=ACTIVE_EDGE_COLOR if (not has_active_view or is_active) else INACTIVE_EDGE_COLOR,
+            penwidth="2.0" if is_active else "1.0",
+        )
+
+    for (producer, consumer), signal_ids in sorted(visual_edges.items()):
+        is_active_edge = (producer, consumer) in active_visual_edges
+        label = "\n".join(signal_ids)
+        dot.edge(
+            producer,
+            consumer,
+            label=label,
+            color=ACTIVE_EDGE_COLOR if (not has_active_view or is_active_edge) else INACTIVE_EDGE_COLOR,
             penwidth="2.0" if is_active_edge else "1.0",
         )
 
@@ -145,7 +227,6 @@ def export(
     output_name: str = "function_web",
     active_ecus: set[str] | None = None,
     active_signals: set[str] | None = None,
-    active_edges: set[tuple[str, str]] | None = None,
     changed_ecus: set[str] | None = None,
     ecu_coverage_counts: dict[str, int] | None = None,
     total_test_cases: int = 0,
@@ -155,7 +236,6 @@ def export(
         graph,
         active_ecus=active_ecus,
         active_signals=active_signals,
-        active_edges=active_edges,
         changed_ecus=changed_ecus,
         ecu_coverage_counts=ecu_coverage_counts,
         total_test_cases=total_test_cases,
@@ -181,7 +261,6 @@ def collect_change_view(
 
     active_ecus: set[str] = set()
     active_signals: set[str] = set()
-    active_edges: set[tuple[str, str]] = set()
 
     for test_case_id in result["selected_test_cases"]:
         test_case = test_cases_by_id[test_case_id]
@@ -192,7 +271,6 @@ def collect_change_view(
             trace = scenario_keyword_traces[keyword_id]
             active_ecus.update(trace.get("reached_ecus", []))
             active_signals.update(trace.get("reached_signals", []))
-            active_edges.update(tuple(edge) for edge in trace.get("reached_edges", []))
 
     changed_ecus = set(result.get("changed_ecus", []))
 
@@ -201,7 +279,6 @@ def collect_change_view(
         "changed_ecus": changed_ecus,
         "active_ecus": active_ecus,
         "active_signals": active_signals,
-        "active_edges": active_edges,
         "selected_test_cases": result.get("selected_test_cases", []),
         "selected_logical_scenarios": result.get("selected_logical_scenarios", []),
     }
@@ -237,7 +314,6 @@ def export_change_view(change_id: str) -> None:
         output_name=f"change_{change_id}",
         active_ecus=change_view["active_ecus"],
         active_signals=change_view["active_signals"],
-        active_edges=change_view["active_edges"],
         changed_ecus=change_view["changed_ecus"],
         title=(
             f"{change_id} | "

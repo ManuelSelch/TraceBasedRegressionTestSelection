@@ -11,11 +11,11 @@ changes:
     changed_ecus: [ultrasonic]
     description: Ultrasonic sensor characteristics changed
 
-  - id: gps_noise_model
+  - id: gps
     changed_ecus: [gps, gps_processor]
     description: GPS measurement characteristics changed
 
-  - id: odometry_drift
+  - id: odometry
     changed_ecus: [odometry, odometry_processor]
     description: Odometry drift characteristics changed
 
