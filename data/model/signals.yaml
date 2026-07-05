@@ -2,7 +2,7 @@ signals:
   - id: camera_image
     level: sensor
     producer: camera
-    consumers: [object_detector, lane_perception]
+    consumers: [object_detector, lane_perception, traffic_light_detector, speed_sign_detector, parking_perception]
     description: Raw front camera image
 
   - id: radar_detections
@@ -23,6 +23,12 @@ signals:
     consumers: [odometry_processor]
     description: Incremental odometry motion measurement
 
+  - id: ultrasonic_ranges
+    level: sensor
+    producer: ultrasonic
+    consumers: [parking_perception]
+    description: Short-range distance readings around the vehicle
+
   - id: bounding_boxes
     level: perception
     producer: object_detector
@@ -32,7 +38,7 @@ signals:
   - id: tracked_objects
     level: perception
     producer: object_tracker
-    consumers: [local_planner]
+    consumers: [acc_module, local_planner]
     description: Temporally fused dynamic and static object tracks
 
   - id: lane_boundaries
@@ -40,6 +46,18 @@ signals:
     producer: lane_perception
     consumers: [local_planner]
     description: Estimated lane boundary geometry
+
+  - id: traffic_light_state
+    level: perception
+    producer: traffic_light_detector
+    consumers: [local_planner]
+    description: Estimated current traffic light state
+
+  - id: speed_limit
+    level: perception
+    producer: speed_sign_detector
+    consumers: [local_planner]
+    description: Active speed limit estimate from road signs
 
   - id: gps_pose
     level: localization
@@ -56,13 +74,13 @@ signals:
   - id: fused_ego_pose
     level: localization
     producer: localization_fusion
-    consumers: [global_planner, local_planner]
+    consumers: [global_planner, local_planner, parking_planner]
     description: Fused ego position and orientation estimate
 
   - id: ego_velocity
     level: localization
     producer: localization_fusion
-    consumers: [local_planner]
+    consumers: [acc_module, local_planner]
     description: Estimated ego velocity
 
   - id: global_route
@@ -70,6 +88,12 @@ signals:
     producer: global_planner
     consumers: [local_planner]
     description: High-level route to the destination
+
+  - id: acc_target_speed
+    level: planning
+    producer: acc_module
+    consumers: [local_planner, brake_controller]
+    description: ACC-derived longitudinal speed recommendation
 
   - id: target_speed
     level: planning
@@ -82,6 +106,24 @@ signals:
     producer: local_planner
     consumers: [steering_controller]
     description: Planned lateral curvature target
+
+  - id: parking_slot_pose
+    level: perception
+    producer: parking_perception
+    consumers: [parking_planner]
+    description: Estimated pose of a free parking slot
+
+  - id: parking_target_speed
+    level: planning
+    producer: parking_planner
+    consumers: [brake_controller]
+    description: Low-speed parking maneuver target speed
+
+  - id: parking_target_curvature
+    level: planning
+    producer: parking_planner
+    consumers: [steering_controller]
+    description: Low-speed parking maneuver target curvature
 
   - id: steer_cmd
     level: control

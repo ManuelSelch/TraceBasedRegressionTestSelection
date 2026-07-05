@@ -1,15 +1,23 @@
 keywords:
-  - id: object_detection
-    description: Test exercises camera-based object detection
+  - id: camera_perception
+    description: Test exercises the camera-based perception pipeline
     initial_ecus: [camera]
 
   - id: radar_perception
-    description: Test exercises radar-supported object perception
+    description: Test exercises the radar-based perception pipeline
     initial_ecus: [radar]
 
-  - id: lane_detection
-    description: Test exercises perception of lane structure
+  - id: lane_geometry_estimation
+    description: Test exercises estimation of lane geometry from visual input
     initial_ecus: [camera]
+
+  - id: traffic_light_recognition
+    description: Test exercises traffic light detection and classification
+    initial_ecus: [traffic_light_detector]
+
+  - id: speed_limit_recognition
+    description: Test exercises speed sign detection and speed limit estimation
+    initial_ecus: [speed_sign_detector]
 
   - id: gps_localization
     description: Test exercises GPS-based localization input processing
@@ -19,22 +27,38 @@ keywords:
     description: Test exercises odometry-based localization input processing
     initial_ecus: [odometry]
 
-  - id: sensor_fusion_localization
+  - id: localization_fusion
     description: Test exercises fusion of localization inputs into a stable ego state
-    initial_ecus: [gps, odometry]
+    initial_ecus: [localization_fusion]
 
-  - id: global_navigation
+  - id: route_planning
     description: Test exercises high-level route computation
     initial_ecus: [global_planner]
 
-  - id: local_navigation
+  - id: adaptive_cruise_control
+    description: Test exercises longitudinal following-speed control support
+    initial_ecus: [acc_module]
+
+  - id: local_motion_planning
     description: Test exercises local motion target generation
     initial_ecus: [local_planner]
+
+  - id: ultrasonic_parking_sensing
+    description: Test exercises ultrasonic short-range sensing for parking
+    initial_ecus: [ultrasonic]
+
+  - id: parking_perception
+    description: Test exercises parking slot detection using short-range sensing
+    initial_ecus: [parking_perception]
+
+  - id: parking_planning
+    description: Test exercises planning of parking maneuvers
+    initial_ecus: [parking_planner]
 
   - id: steering_control
     description: Test exercises lateral control behavior
     initial_ecus: [steering_controller]
 
-  - id: braking
+  - id: braking_control
     description: Test exercises longitudinal stop or slow-down behavior
     initial_ecus: [brake_controller]

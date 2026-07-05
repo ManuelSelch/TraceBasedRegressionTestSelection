@@ -1,23 +1,39 @@
 scenarios:
   - id: lane_following
     description: Ego vehicle follows its lane without relevant obstacles ahead
-    keywords: [lane_detection, sensor_fusion_localization, local_navigation, steering_control]
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
     parameters:
       road_curvature: [low, medium]
       ego_speed_kmh: [20, 60]
 
+  - id: curve_following
+    description: Ego vehicle follows a curved road section with higher lateral control demand
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    parameters:
+      road_curvature: [medium, high]
+      ego_speed_kmh: [30, 80]
+
   - id: pedestrian_crossing
     description: Pedestrian crosses the ego lane in front of the vehicle
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     parameters:
       ego_speed_kmh: [20, 50]
       pedestrian_speed_ms: [0.5, 2.0]
       crossing_distance_m: [5, 25]
       occlusion: [false, true]
 
+  - id: occluded_pedestrian
+    description: Pedestrian emerges from an occluded area close to the ego lane
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    parameters:
+      ego_speed_kmh: [20, 50]
+      pedestrian_speed_ms: [0.5, 2.0]
+      reveal_distance_m: [3, 15]
+      occluder_size: [small, large]
+
   - id: static_obstacle
     description: Static obstacle blocks the ego lane
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     parameters:
       ego_speed_kmh: [20, 70]
       obstacle_distance_m: [8, 40]
@@ -25,7 +41,7 @@ scenarios:
 
   - id: merge_into_traffic
     description: Ego vehicle merges into a lane occupied by other traffic participants
-    keywords: [object_detection, radar_perception, lane_detection, sensor_fusion_localization, local_navigation, steering_control, braking]
+    keywords: [camera_perception, radar_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control, braking_control]
     parameters:
       ego_speed_kmh: [30, 80]
       target_lane_gap_m: [5, 25]
@@ -33,23 +49,47 @@ scenarios:
 
   - id: intersection_approach
     description: Ego vehicle approaches an intersection with crossing traffic
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, global_navigation, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, route_planning, local_motion_planning, braking_control]
     parameters:
       ego_speed_kmh: [20, 60]
       crossing_vehicle_speed_kmh: [10, 70]
       time_to_intersection_s: [1, 8]
 
+  - id: red_light_approach
+    description: Ego vehicle approaches a red traffic light and must stop before the line
+    keywords: [camera_perception, traffic_light_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    parameters:
+      ego_speed_kmh: [20, 60]
+      distance_to_light_m: [10, 80]
+      light_state: [red]
+
+  - id: speed_limit_zone
+    description: Ego vehicle enters a zone with a lower speed limit and must adapt speed
+    keywords: [camera_perception, speed_limit_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    parameters:
+      ego_speed_kmh: [30, 90]
+      posted_speed_limit_kmh: [30, 50, 80]
+      compliance_distance_m: [10, 100]
+
   - id: lead_vehicle_braking
     description: Ego vehicle follows a lead vehicle that suddenly slows down
-    keywords: [object_detection, radar_perception, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
     parameters:
       ego_speed_kmh: [30, 90]
       lead_vehicle_speed_kmh: [10, 80]
       initial_gap_m: [5, 40]
 
+  - id: car_following
+    description: Ego vehicle follows another vehicle at a safe distance over time
+    keywords: [radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    parameters:
+      ego_speed_kmh: [30, 100]
+      lead_vehicle_speed_kmh: [20, 100]
+      desired_gap_m: [10, 50]
+
   - id: route_following
     description: Ego vehicle follows a longer route with navigation-relevant turns
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation, steering_control]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning, steering_control]
     parameters:
       route_length_m: [100, 1000]
       turn_count: [1, 5]
@@ -57,8 +97,32 @@ scenarios:
 
   - id: gps_degraded_navigation
     description: Ego vehicle must continue navigation under degraded GPS quality
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
     parameters:
       gps_noise_level: [low, medium, high]
       route_length_m: [100, 800]
       ego_speed_kmh: [20, 60]
+
+  - id: odometry_drift_recovery
+    description: Ego vehicle compensates growing odometry drift during longer navigation
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    parameters:
+      odometry_drift_level: [low, medium, high]
+      route_length_m: [100, 800]
+      ego_speed_kmh: [20, 60]
+
+  - id: parking_slot_search
+    description: Ego vehicle searches for a suitable parking slot at low speed
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    parameters:
+      ego_speed_kmh: [5, 20]
+      parking_lane_length_m: [20, 100]
+      slot_visibility: [good, limited]
+
+  - id: parallel_parking
+    description: Ego vehicle performs a parallel parking maneuver into a detected slot
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    parameters:
+      slot_length_m: [5, 9]
+      lateral_offset_m: [0.2, 1.0]
+      initial_speed_kmh: [3, 10]

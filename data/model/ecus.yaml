@@ -23,6 +23,12 @@ ecus:
     description: Provides incremental ego motion estimates
     outputs: [odometry_delta]
 
+  - id: ultrasonic
+    type: sensor
+    forwards_only: false
+    description: Provides short-range distance measurements for parking
+    outputs: [ultrasonic_ranges]
+
   - id: object_detector
     type: processing
     forwards_only: false
@@ -43,6 +49,20 @@ ecus:
     description: Extracts lane geometry from camera input
     inputs: [camera_image]
     outputs: [lane_boundaries]
+
+  - id: traffic_light_detector
+    type: processing
+    forwards_only: false
+    description: Detects and classifies traffic lights from camera input
+    inputs: [camera_image]
+    outputs: [traffic_light_state]
+
+  - id: speed_sign_detector
+    type: processing
+    forwards_only: false
+    description: Detects speed signs and estimates active speed limits
+    inputs: [camera_image]
+    outputs: [speed_limit]
 
   - id: gps_processor
     type: processing
@@ -72,23 +92,44 @@ ecus:
     inputs: [fused_ego_pose]
     outputs: [global_route]
 
+  - id: acc_module
+    type: processing
+    forwards_only: false
+    description: Computes adaptive cruise speed suggestions from tracked objects
+    inputs: [tracked_objects, ego_velocity]
+    outputs: [acc_target_speed]
+
   - id: local_planner
     type: processing
     forwards_only: false
     description: Computes local motion targets from route, perception, and ego state
-    inputs: [global_route, tracked_objects, lane_boundaries, fused_ego_pose, ego_velocity]
+    inputs: [global_route, tracked_objects, lane_boundaries, traffic_light_state, speed_limit, fused_ego_pose, ego_velocity, acc_target_speed]
     outputs: [target_speed, target_curvature]
+
+  - id: parking_perception
+    type: processing
+    forwards_only: false
+    description: Detects free parking slots using camera and ultrasonic sensors
+    inputs: [camera_image, ultrasonic_ranges]
+    outputs: [parking_slot_pose]
+
+  - id: parking_planner
+    type: processing
+    forwards_only: false
+    description: Plans low-speed parking maneuvers into a target slot
+    inputs: [parking_slot_pose, fused_ego_pose]
+    outputs: [parking_target_speed, parking_target_curvature]
 
   - id: steering_controller
     type: processing
     forwards_only: false
     description: Converts target curvature to steering commands
-    inputs: [target_curvature]
+    inputs: [target_curvature, parking_target_curvature]
     outputs: [steer_cmd]
 
   - id: brake_controller
     type: processing
     forwards_only: false
     description: Converts target speed to braking commands
-    inputs: [target_speed]
+    inputs: [target_speed, acc_target_speed, parking_target_speed]
     outputs: [brake_cmd]

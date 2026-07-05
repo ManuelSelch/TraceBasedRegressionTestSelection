@@ -1,60 +1,72 @@
 changes:
   - id: camera_sensor_change
     changed_ecus: [camera]
-    impacted_signals: [camera_image, bounding_boxes, tracked_objects, lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Camera hardware or calibration changed
 
   - id: radar_sensor_change
     changed_ecus: [radar]
-    impacted_signals: [radar_detections, tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Radar hardware or calibration changed
+
+  - id: ultrasonic_sensor_change
+    changed_ecus: [ultrasonic]
+    description: Ultrasonic sensor characteristics changed
 
   - id: gps_noise_model_change
     changed_ecus: [gps, gps_processor]
-    impacted_signals: [gps_fix, gps_pose, fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: GPS measurement characteristics changed
 
   - id: odometry_drift_change
     changed_ecus: [odometry, odometry_processor]
-    impacted_signals: [odometry_delta, odometry_pose, fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Odometry drift characteristics changed
 
   - id: localization_fusion_change
     changed_ecus: [localization_fusion]
-    impacted_signals: [fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Sensor-fusion localization logic changed
 
   - id: object_detector_change
     changed_ecus: [object_detector]
-    impacted_signals: [bounding_boxes, tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Camera-based object detector changed
 
   - id: object_tracker_change
     changed_ecus: [object_tracker]
-    impacted_signals: [tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Object tracker or fusion logic changed
 
   - id: lane_perception_change
     changed_ecus: [lane_perception]
-    impacted_signals: [lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Lane detection or lane geometry estimation changed
+
+  - id: traffic_light_detector_change
+    changed_ecus: [traffic_light_detector]
+    description: Traffic light recognition changed
+
+  - id: speed_sign_detector_change
+    changed_ecus: [speed_sign_detector]
+    description: Speed sign recognition changed
 
   - id: global_planner_change
     changed_ecus: [global_planner]
-    impacted_signals: [global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
     description: High-level route planner changed
+
+  - id: acc_module_change
+    changed_ecus: [acc_module]
+    description: Adaptive cruise control logic changed
 
   - id: local_planner_change
     changed_ecus: [local_planner]
-    impacted_signals: [target_speed, target_curvature, steer_cmd, brake_cmd]
     description: Local motion planner changed
+
+  - id: parking_perception_change
+    changed_ecus: [parking_perception]
+    description: Parking slot detection logic changed
+
+  - id: parking_planner_change
+    changed_ecus: [parking_planner]
+    description: Parking maneuver planner changed
 
   - id: steering_controller_change
     changed_ecus: [steering_controller]
-    impacted_signals: [steer_cmd]
     description: Steering controller tuning changed
 
   - id: brake_controller_change
     changed_ecus: [brake_controller]
-    impacted_signals: [brake_cmd]
     description: Brake controller tuning changed

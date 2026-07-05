@@ -1,128 +1,256 @@
 test_cases:
   - id: TC001
     logical_scenario: lane_following
-    keywords: [lane_detection, sensor_fusion_localization, local_navigation, steering_control]
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
     seed_parameters:
       road_curvature: low
       ego_speed_kmh: 30
 
   - id: TC002
     logical_scenario: lane_following
-    keywords: [lane_detection, sensor_fusion_localization, local_navigation, steering_control]
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
     seed_parameters:
       road_curvature: medium
       ego_speed_kmh: 55
 
   - id: TC003
+    logical_scenario: curve_following
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    seed_parameters:
+      road_curvature: medium
+      ego_speed_kmh: 45
+
+  - id: TC004
+    logical_scenario: curve_following
+    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    seed_parameters:
+      road_curvature: high
+      ego_speed_kmh: 70
+
+  - id: TC005
     logical_scenario: pedestrian_crossing
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 30
       pedestrian_speed_ms: 1.2
       crossing_distance_m: 12
       occlusion: false
 
-  - id: TC004
+  - id: TC006
     logical_scenario: pedestrian_crossing
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 45
       pedestrian_speed_ms: 1.8
       crossing_distance_m: 8
       occlusion: true
 
-  - id: TC005
+  - id: TC007
+    logical_scenario: occluded_pedestrian
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 25
+      pedestrian_speed_ms: 1.0
+      reveal_distance_m: 10
+      occluder_size: small
+
+  - id: TC008
+    logical_scenario: occluded_pedestrian
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 40
+      pedestrian_speed_ms: 1.5
+      reveal_distance_m: 5
+      occluder_size: large
+
+  - id: TC009
     logical_scenario: static_obstacle
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 40
       obstacle_distance_m: 20
       obstacle_width_m: 1.0
 
-  - id: TC006
+  - id: TC010
     logical_scenario: static_obstacle
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 65
       obstacle_distance_m: 12
       obstacle_width_m: 2.0
 
-  - id: TC007
+  - id: TC011
     logical_scenario: merge_into_traffic
-    keywords: [object_detection, radar_perception, lane_detection, sensor_fusion_localization, local_navigation, steering_control, braking]
+    keywords: [camera_perception, radar_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control, braking_control]
     seed_parameters:
       ego_speed_kmh: 50
       target_lane_gap_m: 15
       other_vehicle_speed_kmh: 60
 
-  - id: TC008
+  - id: TC012
     logical_scenario: merge_into_traffic
-    keywords: [object_detection, radar_perception, lane_detection, sensor_fusion_localization, local_navigation, steering_control, braking]
+    keywords: [camera_perception, radar_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control, braking_control]
     seed_parameters:
       ego_speed_kmh: 70
       target_lane_gap_m: 8
       other_vehicle_speed_kmh: 85
 
-  - id: TC009
+  - id: TC013
     logical_scenario: intersection_approach
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, global_navigation, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, route_planning, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 35
       crossing_vehicle_speed_kmh: 30
       time_to_intersection_s: 5
 
-  - id: TC010
+  - id: TC014
     logical_scenario: intersection_approach
-    keywords: [object_detection, lane_detection, sensor_fusion_localization, global_navigation, local_navigation, braking]
+    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, route_planning, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 55
       crossing_vehicle_speed_kmh: 50
       time_to_intersection_s: 2
 
-  - id: TC011
+  - id: TC015
+    logical_scenario: red_light_approach
+    keywords: [camera_perception, traffic_light_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 35
+      distance_to_light_m: 40
+      light_state: red
+
+  - id: TC016
+    logical_scenario: red_light_approach
+    keywords: [camera_perception, traffic_light_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 55
+      distance_to_light_m: 20
+      light_state: red
+
+  - id: TC017
+    logical_scenario: speed_limit_zone
+    keywords: [camera_perception, speed_limit_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 80
+      posted_speed_limit_kmh: 50
+      compliance_distance_m: 60
+
+  - id: TC018
+    logical_scenario: speed_limit_zone
+    keywords: [camera_perception, speed_limit_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 50
+      posted_speed_limit_kmh: 30
+      compliance_distance_m: 20
+
+  - id: TC019
     logical_scenario: lead_vehicle_braking
-    keywords: [object_detection, radar_perception, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 60
       lead_vehicle_speed_kmh: 40
       initial_gap_m: 18
 
-  - id: TC012
+  - id: TC020
     logical_scenario: lead_vehicle_braking
-    keywords: [object_detection, radar_perception, sensor_fusion_localization, local_navigation, braking]
+    keywords: [camera_perception, radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
     seed_parameters:
       ego_speed_kmh: 80
       lead_vehicle_speed_kmh: 20
       initial_gap_m: 10
 
-  - id: TC013
+  - id: TC021
+    logical_scenario: car_following
+    keywords: [radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 50
+      lead_vehicle_speed_kmh: 45
+      desired_gap_m: 20
+
+  - id: TC022
+    logical_scenario: car_following
+    keywords: [radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 90
+      lead_vehicle_speed_kmh: 70
+      desired_gap_m: 35
+
+  - id: TC023
     logical_scenario: route_following
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation, steering_control]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning, steering_control]
     seed_parameters:
       route_length_m: 250
       turn_count: 2
       ego_speed_kmh: 35
 
-  - id: TC014
+  - id: TC024
     logical_scenario: route_following
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation, steering_control]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning, steering_control]
     seed_parameters:
       route_length_m: 800
       turn_count: 4
       ego_speed_kmh: 60
 
-  - id: TC015
+  - id: TC025
     logical_scenario: gps_degraded_navigation
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
     seed_parameters:
       gps_noise_level: medium
       route_length_m: 300
       ego_speed_kmh: 35
 
-  - id: TC016
+  - id: TC026
     logical_scenario: gps_degraded_navigation
-    keywords: [gps_localization, odometry_localization, sensor_fusion_localization, global_navigation, local_navigation]
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
     seed_parameters:
       gps_noise_level: high
       route_length_m: 600
       ego_speed_kmh: 50
+
+  - id: TC027
+    logical_scenario: odometry_drift_recovery
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    seed_parameters:
+      odometry_drift_level: medium
+      route_length_m: 250
+      ego_speed_kmh: 35
+
+  - id: TC028
+    logical_scenario: odometry_drift_recovery
+    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    seed_parameters:
+      odometry_drift_level: high
+      route_length_m: 700
+      ego_speed_kmh: 50
+
+  - id: TC029
+    logical_scenario: parking_slot_search
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 10
+      parking_lane_length_m: 60
+      slot_visibility: good
+
+  - id: TC030
+    logical_scenario: parking_slot_search
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    seed_parameters:
+      ego_speed_kmh: 15
+      parking_lane_length_m: 40
+      slot_visibility: limited
+
+  - id: TC031
+    logical_scenario: parallel_parking
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    seed_parameters:
+      slot_length_m: 6
+      lateral_offset_m: 0.4
+      initial_speed_kmh: 5
+
+  - id: TC032
+    logical_scenario: parallel_parking
+    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    seed_parameters:
+      slot_length_m: 8
+      lateral_offset_m: 0.8
+      initial_speed_kmh: 8
