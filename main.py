@@ -6,12 +6,7 @@ from typing import Any
 
 import yaml
 
-from src.graph_builder import build_function_web, generate_all_keyword_traces
-from src.selectors import (
-    build_ecu_to_test_cases_map,
-    generate_all_test_case_traces,
-    select_test_cases_for_all_changes,
-)
+from src.experiments import run_experiments, run_selection_pipeline
 from src.visualize_function_web import export
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -34,25 +29,31 @@ def main() -> None:
     scenarios = load_yaml(MODEL_DIR / "scenarios.yaml")["scenarios"]
     changes = load_yaml(MODEL_DIR / "changes.yaml")["changes"]
     test_cases = load_yaml(BENCHMARK_DIR / "test_cases.yaml")["test_cases"]
+    experiments = load_yaml(BENCHMARK_DIR / "experiments.yaml")["experiments"]
 
-    scenarios_by_id = {scenario["id"]: scenario for scenario in scenarios}
-
-    function_web = build_function_web(ecus, signals)
-    keyword_traces = {
-        scenario["id"]: generate_all_keyword_traces(
-            function_web,
-            keywords,
-            active_features=scenario.get("active_features", []),
-        )
-        for scenario in scenarios
-    }
-    test_case_traces = generate_all_test_case_traces(
+    baseline_pipeline = run_selection_pipeline(
+        ecus,
+        signals,
+        keywords,
+        scenarios,
+        changes,
         test_cases,
-        scenarios_by_id,
-        keyword_traces,
     )
-    ecu_to_test_cases = build_ecu_to_test_cases_map(test_case_traces)
-    selection_results = select_test_cases_for_all_changes(changes, test_case_traces)
+    function_web = baseline_pipeline["function_web"]
+    keyword_traces = baseline_pipeline["keyword_traces"]
+    test_case_traces = baseline_pipeline["test_case_traces"]
+    ecu_to_test_cases = baseline_pipeline["ecu_to_test_cases"]
+    selection_results = baseline_pipeline["selection_results"]
+
+    experiment_results = run_experiments(
+        ecus,
+        signals,
+        keywords,
+        scenarios,
+        changes,
+        test_cases,
+        experiments,
+    )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -61,6 +62,7 @@ def main() -> None:
         "test_case_traces.json": test_case_traces,
         "ecu_to_test_cases.json": ecu_to_test_cases,
         "selection_results.json": selection_results,
+        "experiment_results.json": experiment_results,
     }
 
     for filename, content in outputs.items():
@@ -75,6 +77,29 @@ def main() -> None:
             f"- {change_id:<{max_change_id_len}}  "
             f"{result['selected_count']:>2}/{result['all_test_cases']:<2} selected  "
             f"reduction: {result['reduction_rate']:.2%}"
+        )
+
+    print("\nExperiment summary:")
+    experiment_summaries = [
+        result["summary"] for result in experiment_results["experiments"].values()
+    ]
+    max_experiment_id_len = max(len(summary["experiment"]) for summary in experiment_summaries)
+    max_worst_change_len = max(
+        len(summary["worst_change"] or "-") for summary in experiment_summaries
+    )
+    print(
+        f"  {'experiment':<{max_experiment_id_len}}  "
+        f"{'avg recall':>10}  "
+        f"{'missed tests':>12}  "
+        f"{'worst change':<{max_worst_change_len}}"
+    )
+    for summary in experiment_summaries:
+        worst_change = summary["worst_change"] or "-"
+        print(
+            f"- {summary['experiment']:<{max_experiment_id_len}}  "
+            f"{summary['avg_test_case_recall']:>10.2%}  "
+            f"{summary['total_missed_affected_test_cases']:>12}  "
+            f"{worst_change:<{max_worst_change_len}}"
         )
 
     export(function_web)
