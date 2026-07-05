@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Any
 import networkx as nx
-
+import yaml
+from pathlib import Path
 
 ECU_KIND = "ecu"
 SIGNAL_KIND = "signal"
@@ -107,32 +108,87 @@ def _add_signal_edges(
             graph.add_edge(signal_id, consumer, relation=CONSUMED_BY_RELATION)
 
 
-if __name__ == "__main__":
-    # Minimal smoke-test example
-    example_ecus = [
-        {"id": "camera", "type": "sensor", "outputs": ["camera_image"]},
-        {
-            "id": "perception",
-            "type": "processing",
-            "inputs": ["camera_image"],
-            "outputs": ["detected_objects"],
-        },
-    ]
-    example_signals = [
-        {
-            "id": "camera_image",
-            "level": "sensor",
-            "producer": "camera",
-            "consumers": ["perception"],
-        },
-        {
-            "id": "detected_objects",
-            "level": "perception",
-            "producer": "perception",
-            "consumers": [],
-        },
-    ]
+def generate_keyword_trace(
+    graph: nx.DiGraph, keyword: dict[str, Any]
+) -> dict[str, Any]:
+    keyword_id = keyword["id"]
+    initial_ecus = list(keyword.get("initial_ecus", []))
 
-    function_web = build_function_web(example_ecus, example_signals)
+    if not initial_ecus:
+        raise ValueError(f"Keyword '{keyword_id}' has no initial ECUs")
+
+    for ecu_id in initial_ecus:
+        if ecu_id not in graph:
+            raise ValueError(
+                f"Keyword '{keyword_id}' references unknown initial ECU '{ecu_id}'"
+            )
+        if graph.nodes[ecu_id].get("kind") != ECU_KIND:
+            raise ValueError(
+                f"Keyword '{keyword_id}' initial node '{ecu_id}' is not an ECU"
+            )
+
+    distances = nx.multi_source_dijkstra_path_length(
+        graph, initial_ecus, weight=lambda _u, _v, _d: 1
+    )
+
+    reached_ecus = sorted(
+        node
+        for node, distance in distances.items()
+        if graph.nodes[node].get("kind") == ECU_KIND and distance >= 0
+    )
+    reached_signals = sorted(
+        node
+        for node, distance in distances.items()
+        if graph.nodes[node].get("kind") == SIGNAL_KIND and distance >= 1
+    )
+    direct_ecus = sorted(
+        node
+        for node, distance in distances.items()
+        if graph.nodes[node].get("kind") == ECU_KIND and distance == 2
+    )
+    indirect_ecus = sorted(
+        node
+        for node, distance in distances.items()
+        if graph.nodes[node].get("kind") == ECU_KIND and distance > 2
+    )
+
+    reached_node_set = set(distances.keys())
+    reached_edges = sorted(
+        [source, target]
+        for source, target in graph.edges()
+        if source in reached_node_set and target in reached_node_set
+    )
+
+    return {
+        "keyword": keyword_id,
+        "initial_ecus": sorted(initial_ecus),
+        "direct_ecus": direct_ecus,
+        "indirect_ecus": indirect_ecus,
+        "reached_ecus": reached_ecus,
+        "reached_signals": reached_signals,
+        "reached_edges": reached_edges,
+    }
+
+
+def generate_all_keyword_traces(
+    graph: nx.DiGraph, keywords: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    return {
+        keyword["id"]: generate_keyword_trace(graph, keyword)
+        for keyword in keywords
+    }
+
+
+if __name__ == "__main__":
+    base = Path("data/model")     
+
+    with open(base / "ecus.yaml")       as f: ecus = yaml.safe_load(f)["ecus"]
+    with open(base / "signals.yaml")    as f: signals = yaml.safe_load(f)["signals"]
+    with open(base / "keywords.yaml")   as f: keywords = yaml.safe_load(f)["keywords"]
+
+    function_web = build_function_web(ecus, signals)
+    keyword_traces = generate_all_keyword_traces(function_web, keywords)
+
     print("Nodes:", list(function_web.nodes(data=True)))
     print("Edges:", list(function_web.edges(data=True)))
+    print("Keyword Traces:", keyword_traces["object_detection"])
