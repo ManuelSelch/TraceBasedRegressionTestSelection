@@ -5,31 +5,78 @@ ecus:
     description: Captures visual scene information
     outputs: [camera_image]
 
-  - id: object_perception
+  - id: radar
+    type: sensor
+    forwards_only: false
+    description: Captures range and relative velocity detections
+    outputs: [radar_detections]
+
+  - id: gps
+    type: sensor
+    forwards_only: false
+    description: Provides global position fixes
+    outputs: [gps_fix]
+
+  - id: odometry
+    type: sensor
+    forwards_only: false
+    description: Provides incremental ego motion estimates
+    outputs: [odometry_delta]
+
+  - id: object_detector
     type: processing
     forwards_only: false
-    description: Extracts object-level perception outputs from camera input
+    description: Extracts camera-based object detections
     inputs: [camera_image]
-    outputs: [bounding_boxes, tracked_objects]
+    outputs: [bounding_boxes]
+
+  - id: object_tracker
+    type: processing
+    forwards_only: false
+    description: Fuses camera and radar object observations over time
+    inputs: [bounding_boxes, radar_detections]
+    outputs: [tracked_objects]
 
   - id: lane_perception
     type: processing
     forwards_only: false
-    description: Extracts lane structure from camera input
+    description: Extracts lane geometry from camera input
     inputs: [camera_image]
     outputs: [lane_boundaries]
 
-  - id: localization
+  - id: gps_processor
     type: processing
     forwards_only: false
-    description: Estimates ego vehicle pose
-    outputs: [ego_pose]
+    description: Converts raw GPS measurements into a pose estimate
+    inputs: [gps_fix]
+    outputs: [gps_pose]
 
-  - id: planner
+  - id: odometry_processor
     type: processing
     forwards_only: false
-    description: Computes low-level planning targets from perception and ego state
-    inputs: [tracked_objects, lane_boundaries, ego_pose]
+    description: Integrates odometry deltas into a local pose estimate
+    inputs: [odometry_delta]
+    outputs: [odometry_pose]
+
+  - id: localization_fusion
+    type: processing
+    forwards_only: false
+    description: Fuses GPS and odometry into a stable ego state estimate
+    inputs: [gps_pose, odometry_pose]
+    outputs: [fused_ego_pose, ego_velocity]
+
+  - id: global_planner
+    type: processing
+    forwards_only: false
+    description: Computes the high-level route to the destination
+    inputs: [fused_ego_pose]
+    outputs: [global_route]
+
+  - id: local_planner
+    type: processing
+    forwards_only: false
+    description: Computes local motion targets from route, perception, and ego state
+    inputs: [global_route, tracked_objects, lane_boundaries, fused_ego_pose, ego_velocity]
     outputs: [target_speed, target_curvature]
 
   - id: steering_controller

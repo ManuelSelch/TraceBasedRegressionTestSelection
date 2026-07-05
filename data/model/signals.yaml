@@ -2,42 +2,84 @@ signals:
   - id: camera_image
     level: sensor
     producer: camera
-    consumers: [object_perception, lane_perception]
+    consumers: [object_detector, lane_perception]
     description: Raw front camera image
+
+  - id: radar_detections
+    level: sensor
+    producer: radar
+    consumers: [object_tracker]
+    description: Radar detections with range and relative velocity
+
+  - id: gps_fix
+    level: sensor
+    producer: gps
+    consumers: [gps_processor]
+    description: Raw GPS position measurement
+
+  - id: odometry_delta
+    level: sensor
+    producer: odometry
+    consumers: [odometry_processor]
+    description: Incremental odometry motion measurement
 
   - id: bounding_boxes
     level: perception
-    producer: object_perception
-    consumers: []
-    description: Raw object detections before temporal fusion
+    producer: object_detector
+    consumers: [object_tracker]
+    description: Camera-based object detections before temporal fusion
 
   - id: tracked_objects
     level: perception
-    producer: object_perception
-    consumers: [planner]
-    description: Temporally fused object tracks
+    producer: object_tracker
+    consumers: [local_planner]
+    description: Temporally fused dynamic and static object tracks
 
   - id: lane_boundaries
     level: perception
     producer: lane_perception
-    consumers: [planner]
+    consumers: [local_planner]
     description: Estimated lane boundary geometry
 
-  - id: ego_pose
+  - id: gps_pose
     level: localization
-    producer: localization
-    consumers: [planner]
-    description: Estimated position and orientation of ego vehicle
+    producer: gps_processor
+    consumers: [localization_fusion]
+    description: Pose estimate derived from GPS
+
+  - id: odometry_pose
+    level: localization
+    producer: odometry_processor
+    consumers: [localization_fusion]
+    description: Pose estimate derived from odometry integration
+
+  - id: fused_ego_pose
+    level: localization
+    producer: localization_fusion
+    consumers: [global_planner, local_planner]
+    description: Fused ego position and orientation estimate
+
+  - id: ego_velocity
+    level: localization
+    producer: localization_fusion
+    consumers: [local_planner]
+    description: Estimated ego velocity
+
+  - id: global_route
+    level: planning
+    producer: global_planner
+    consumers: [local_planner]
+    description: High-level route to the destination
 
   - id: target_speed
     level: planning
-    producer: planner
+    producer: local_planner
     consumers: [brake_controller]
     description: Planned longitudinal speed target
 
   - id: target_curvature
     level: planning
-    producer: planner
+    producer: local_planner
     consumers: [steering_controller]
     description: Planned lateral curvature target
 

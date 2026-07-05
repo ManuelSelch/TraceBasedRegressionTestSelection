@@ -1,19 +1,35 @@
 keywords:
   - id: object_detection
-    description: Test exercises the ability to detect relevant road users or obstacles
+    description: Test exercises camera-based object detection
     initial_ecus: [camera]
+
+  - id: radar_perception
+    description: Test exercises radar-supported object perception
+    initial_ecus: [radar]
 
   - id: lane_detection
     description: Test exercises perception of lane structure
     initial_ecus: [camera]
 
-  - id: localization
-    description: Test exercises ego state estimation
-    initial_ecus: [localization]
+  - id: gps_localization
+    description: Test exercises GPS-based localization input processing
+    initial_ecus: [gps]
 
-  - id: path_planning
-    description: Test exercises low-level planning target computation
-    initial_ecus: [planner]
+  - id: odometry_localization
+    description: Test exercises odometry-based localization input processing
+    initial_ecus: [odometry]
+
+  - id: sensor_fusion_localization
+    description: Test exercises fusion of localization inputs into a stable ego state
+    initial_ecus: [gps, odometry]
+
+  - id: global_navigation
+    description: Test exercises high-level route computation
+    initial_ecus: [global_planner]
+
+  - id: local_navigation
+    description: Test exercises local motion target generation
+    initial_ecus: [local_planner]
 
   - id: steering_control
     description: Test exercises lateral control behavior

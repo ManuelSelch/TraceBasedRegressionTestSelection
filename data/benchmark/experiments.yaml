@@ -3,20 +3,40 @@ experiments:
     description: Use all signals and dependencies as ground truth
 
   - id: omit_camera_image
-    description: Remove the raw sensor image signal from the model
+    description: Remove the raw camera signal from the model
     removed_signals: [camera_image]
 
+  - id: omit_radar_detections
+    description: Remove the radar sensor signal from the model
+    removed_signals: [radar_detections]
+
+  - id: omit_gps_fix
+    description: Remove the raw GPS sensor signal from the model
+    removed_signals: [gps_fix]
+
+  - id: omit_odometry_delta
+    description: Remove the odometry sensor signal from the model
+    removed_signals: [odometry_delta]
+
   - id: omit_bounding_boxes
-    description: Remove low-level object detections from the model
+    description: Remove low-level camera object detections from the model
     removed_signals: [bounding_boxes]
 
   - id: omit_tracked_objects
-    description: Remove temporally fused object tracks from the model
+    description: Remove tracked object state from the model
     removed_signals: [tracked_objects]
 
   - id: omit_lane_boundaries
     description: Remove lane geometry estimation from the model
     removed_signals: [lane_boundaries]
+
+  - id: omit_fused_ego_pose
+    description: Remove fused localization output from the model
+    removed_signals: [fused_ego_pose]
+
+  - id: omit_global_route
+    description: Remove the high-level route signal from the model
+    removed_signals: [global_route]
 
   - id: omit_target_speed
     description: Remove longitudinal planning output from the model
@@ -26,12 +46,17 @@ experiments:
     description: Remove lateral planning output from the model
     removed_signals: [target_curvature]
 
-  - id: omit_camera_to_object_perception_edge
-    description: Remove dependency between camera and object perception
+  - id: omit_camera_to_object_detector_edge
+    description: Remove dependency between camera and object detector
     removed_edges:
-      - [camera_image, object_perception]
+      - [camera_image, object_detector]
 
-  - id: omit_planner_to_brake_controller_edge
-    description: Remove dependency between planner and brake controller
+  - id: omit_radar_to_object_tracker_edge
+    description: Remove dependency between radar and object tracker
     removed_edges:
-      - [target_speed, brake_controller]
+      - [radar_detections, object_tracker]
+
+  - id: omit_global_to_local_planner_edge
+    description: Remove dependency between global and local planner
+    removed_edges:
+      - [global_route, local_planner]

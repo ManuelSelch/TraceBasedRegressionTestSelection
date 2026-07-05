@@ -1,35 +1,60 @@
 changes:
-  - id: planner_code_change
-    changed_ecus: [planner]
-    impacted_signals: [target_speed, target_curvature, steer_cmd, brake_cmd]
-    description: Internal planner logic was updated
-
-  - id: camera_mount_height_change
+  - id: camera_sensor_change
     changed_ecus: [camera]
     impacted_signals: [camera_image, bounding_boxes, tracked_objects, lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
-    description: Camera viewpoint changed due to sensor mounting variation
+    description: Camera hardware or calibration changed
 
-  - id: object_perception_model_change
-    changed_ecus: [object_perception]
+  - id: radar_sensor_change
+    changed_ecus: [radar]
+    impacted_signals: [radar_detections, tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: Radar hardware or calibration changed
+
+  - id: gps_noise_model_change
+    changed_ecus: [gps, gps_processor]
+    impacted_signals: [gps_fix, gps_pose, fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: GPS measurement characteristics changed
+
+  - id: odometry_drift_change
+    changed_ecus: [odometry, odometry_processor]
+    impacted_signals: [odometry_delta, odometry_pose, fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: Odometry drift characteristics changed
+
+  - id: localization_fusion_change
+    changed_ecus: [localization_fusion]
+    impacted_signals: [fused_ego_pose, ego_velocity, global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: Sensor-fusion localization logic changed
+
+  - id: object_detector_change
+    changed_ecus: [object_detector]
     impacted_signals: [bounding_boxes, tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
-    description: New object perception model version
+    description: Camera-based object detector changed
 
-  - id: lane_perception_model_change
+  - id: object_tracker_change
+    changed_ecus: [object_tracker]
+    impacted_signals: [tracked_objects, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: Object tracker or fusion logic changed
+
+  - id: lane_perception_change
     changed_ecus: [lane_perception]
     impacted_signals: [lane_boundaries, target_speed, target_curvature, steer_cmd, brake_cmd]
-    description: New lane perception model version
+    description: Lane detection or lane geometry estimation changed
 
-  - id: localization_noise_model_change
-    changed_ecus: [localization]
-    impacted_signals: [ego_pose, target_speed, target_curvature, steer_cmd, brake_cmd]
-    description: Localization output characteristics changed
+  - id: global_planner_change
+    changed_ecus: [global_planner]
+    impacted_signals: [global_route, target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: High-level route planner changed
 
-  - id: steering_controller_tuning_change
+  - id: local_planner_change
+    changed_ecus: [local_planner]
+    impacted_signals: [target_speed, target_curvature, steer_cmd, brake_cmd]
+    description: Local motion planner changed
+
+  - id: steering_controller_change
     changed_ecus: [steering_controller]
     impacted_signals: [steer_cmd]
-    description: Steering controller tuning was modified
+    description: Steering controller tuning changed
 
-  - id: brake_controller_tuning_change
+  - id: brake_controller_change
     changed_ecus: [brake_controller]
     impacted_signals: [brake_cmd]
-    description: Brake controller tuning was modified
+    description: Brake controller tuning changed
