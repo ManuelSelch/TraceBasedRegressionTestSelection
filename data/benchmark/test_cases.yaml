@@ -1,35 +1,35 @@
 test_cases:
   - id: TC001
     logical_scenario: lane_following
-    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       road_curvature: low
       ego_speed_kmh: 30
 
   - id: TC002
     logical_scenario: lane_following
-    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       road_curvature: medium
       ego_speed_kmh: 55
 
   - id: TC003
     logical_scenario: curve_following
-    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       road_curvature: medium
       ego_speed_kmh: 45
 
   - id: TC004
     logical_scenario: curve_following
-    keywords: [lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       road_curvature: high
       ego_speed_kmh: 70
 
   - id: TC005
     logical_scenario: pedestrian_crossing
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 30
       pedestrian_speed_ms: 1.2
@@ -38,7 +38,7 @@ test_cases:
 
   - id: TC006
     logical_scenario: pedestrian_crossing
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 45
       pedestrian_speed_ms: 1.8
@@ -47,7 +47,7 @@ test_cases:
 
   - id: TC007
     logical_scenario: occluded_pedestrian
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 25
       pedestrian_speed_ms: 1.0
@@ -56,7 +56,7 @@ test_cases:
 
   - id: TC008
     logical_scenario: occluded_pedestrian
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 40
       pedestrian_speed_ms: 1.5
@@ -65,7 +65,7 @@ test_cases:
 
   - id: TC009
     logical_scenario: static_obstacle
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 40
       obstacle_distance_m: 20
@@ -73,7 +73,7 @@ test_cases:
 
   - id: TC010
     logical_scenario: static_obstacle
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 65
       obstacle_distance_m: 12
@@ -81,7 +81,7 @@ test_cases:
 
   - id: TC011
     logical_scenario: merge_into_traffic
-    keywords: [camera_perception, radar_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control, braking_control]
+    keywords: [camera, radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 50
       target_lane_gap_m: 15
@@ -89,7 +89,7 @@ test_cases:
 
   - id: TC012
     logical_scenario: merge_into_traffic
-    keywords: [camera_perception, radar_perception, lane_geometry_estimation, localization_fusion, local_motion_planning, steering_control, braking_control]
+    keywords: [camera, radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 70
       target_lane_gap_m: 8
@@ -97,7 +97,7 @@ test_cases:
 
   - id: TC013
     logical_scenario: intersection_approach
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 35
       crossing_vehicle_speed_kmh: 30
@@ -105,7 +105,7 @@ test_cases:
 
   - id: TC014
     logical_scenario: intersection_approach
-    keywords: [camera_perception, lane_geometry_estimation, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 55
       crossing_vehicle_speed_kmh: 50
@@ -113,7 +113,7 @@ test_cases:
 
   - id: TC015
     logical_scenario: red_light_approach
-    keywords: [camera_perception, traffic_light_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 35
       distance_to_light_m: 40
@@ -121,7 +121,7 @@ test_cases:
 
   - id: TC016
     logical_scenario: red_light_approach
-    keywords: [camera_perception, traffic_light_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 55
       distance_to_light_m: 20
@@ -129,7 +129,7 @@ test_cases:
 
   - id: TC017
     logical_scenario: speed_limit_zone
-    keywords: [camera_perception, speed_limit_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 80
       posted_speed_limit_kmh: 50
@@ -137,7 +137,7 @@ test_cases:
 
   - id: TC018
     logical_scenario: speed_limit_zone
-    keywords: [camera_perception, speed_limit_recognition, localization_fusion, route_planning, local_motion_planning, braking_control]
+    keywords: [camera, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 50
       posted_speed_limit_kmh: 30
@@ -145,7 +145,7 @@ test_cases:
 
   - id: TC019
     logical_scenario: lead_vehicle_braking
-    keywords: [camera_perception, radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    keywords: [camera, radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 60
       lead_vehicle_speed_kmh: 40
@@ -153,7 +153,7 @@ test_cases:
 
   - id: TC020
     logical_scenario: lead_vehicle_braking
-    keywords: [camera_perception, radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    keywords: [camera, radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 80
       lead_vehicle_speed_kmh: 20
@@ -161,7 +161,7 @@ test_cases:
 
   - id: TC021
     logical_scenario: car_following
-    keywords: [radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    keywords: [radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 50
       lead_vehicle_speed_kmh: 45
@@ -169,7 +169,7 @@ test_cases:
 
   - id: TC022
     logical_scenario: car_following
-    keywords: [radar_perception, localization_fusion, adaptive_cruise_control, local_motion_planning, braking_control]
+    keywords: [radar, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 90
       lead_vehicle_speed_kmh: 70
@@ -177,7 +177,7 @@ test_cases:
 
   - id: TC023
     logical_scenario: route_following
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning, steering_control]
+    keywords: [gps, odometry]
     seed_parameters:
       route_length_m: 250
       turn_count: 2
@@ -185,7 +185,7 @@ test_cases:
 
   - id: TC024
     logical_scenario: route_following
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning, steering_control]
+    keywords: [gps, odometry]
     seed_parameters:
       route_length_m: 800
       turn_count: 4
@@ -193,7 +193,7 @@ test_cases:
 
   - id: TC025
     logical_scenario: gps_degraded_navigation
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    keywords: [gps, odometry]
     seed_parameters:
       gps_noise_level: medium
       route_length_m: 300
@@ -201,7 +201,7 @@ test_cases:
 
   - id: TC026
     logical_scenario: gps_degraded_navigation
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    keywords: [gps, odometry]
     seed_parameters:
       gps_noise_level: high
       route_length_m: 600
@@ -209,7 +209,7 @@ test_cases:
 
   - id: TC027
     logical_scenario: odometry_drift_recovery
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    keywords: [gps, odometry]
     seed_parameters:
       odometry_drift_level: medium
       route_length_m: 250
@@ -217,7 +217,7 @@ test_cases:
 
   - id: TC028
     logical_scenario: odometry_drift_recovery
-    keywords: [gps_localization, odometry_localization, localization_fusion, route_planning, local_motion_planning]
+    keywords: [gps, odometry]
     seed_parameters:
       odometry_drift_level: high
       route_length_m: 700
@@ -225,7 +225,7 @@ test_cases:
 
   - id: TC029
     logical_scenario: parking_slot_search
-    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    keywords: [camera, ultrasonic, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 10
       parking_lane_length_m: 60
@@ -233,7 +233,7 @@ test_cases:
 
   - id: TC030
     logical_scenario: parking_slot_search
-    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    keywords: [camera, ultrasonic, gps, odometry]
     seed_parameters:
       ego_speed_kmh: 15
       parking_lane_length_m: 40
@@ -241,7 +241,7 @@ test_cases:
 
   - id: TC031
     logical_scenario: parallel_parking
-    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    keywords: [camera, ultrasonic, gps, odometry]
     seed_parameters:
       slot_length_m: 6
       lateral_offset_m: 0.4
@@ -249,7 +249,7 @@ test_cases:
 
   - id: TC032
     logical_scenario: parallel_parking
-    keywords: [camera_perception, ultrasonic_parking_sensing, parking_perception, localization_fusion, parking_planning, steering_control, braking_control]
+    keywords: [camera, ultrasonic, gps, odometry]
     seed_parameters:
       slot_length_m: 8
       lateral_offset_m: 0.8
