@@ -119,39 +119,45 @@ def _find_arbiters(graph: nx.DiGraph) -> list[str]:
     )
 
 
-def _compute_mode_relevant_nodes(
+def _compute_output_relevant_nodes(
     graph: nx.DiGraph,
-    arbiter_id: str,
-    allowed_signals: list[str],
+    active_arbiter_modes: dict[str, str],
 ) -> set[str]:
-    """Compute the set of ECUs and signals that can reach the arbiter
-    through one of the allowed input signals in the current mode.
+    """Compute all nodes that can contribute to any observable sink output.
 
-    Uses reverse BFS from the allowed arbiter input signals. Returns a set
-    containing all ECUs and signals that contribute to the arbiter output
-    in that mode, plus the arbiter itself and its outputs.
+    Observable sinks are signal nodes without consumers. Reverse traversal keeps
+    all branches, except when traversing backwards through an arbiter ECU: in
+    that case only the input signal allowed by the active arbiter mode is kept.
     """
-    relevant: set[str] = set()
-    queue: deque[str] = deque()
+    sink_signals = [
+        node
+        for node, attrs in graph.nodes(data=True)
+        if attrs.get("kind") == SIGNAL_KIND and graph.out_degree(node) == 0
+    ]
 
-    for signal_id in allowed_signals:
-        if signal_id in graph:
-            queue.append(signal_id)
-            relevant.add(signal_id)
-
-    if arbiter_id in graph:
-        relevant.add(arbiter_id)
-        for successor in graph.successors(arbiter_id):
-            relevant.add(successor)
+    relevant: set[str] = set(sink_signals)
+    queue: deque[str] = deque(sink_signals)
 
     while queue:
         current = queue.popleft()
         if current not in graph:
             continue
-        for predecessor in graph.predecessors(current):
-            if predecessor not in relevant:
-                relevant.add(predecessor)
-                queue.append(predecessor)
+
+        predecessors = list(graph.predecessors(current))
+        if (
+            graph.nodes[current].get("kind") == ECU_KIND
+            and graph.nodes[current].get("ecu_type") == "arbiter"
+        ):
+            arbiter_mode = active_arbiter_modes.get(current)
+            if arbiter_mode is not None:
+                allowed_signal = graph.nodes[current].get("mode_inputs", {}).get(arbiter_mode)
+                predecessors = [pred for pred in predecessors if pred == allowed_signal]
+
+        for predecessor in predecessors:
+            if predecessor in relevant:
+                continue
+            relevant.add(predecessor)
+            queue.append(predecessor)
 
     return relevant
 
@@ -215,22 +221,15 @@ def generate_keyword_trace(
         for arbiter_id in _find_arbiters(graph):
             effective_arbiter_modes.setdefault(arbiter_id, active_mode)
 
-    # Compute mode-relevant subgraph when arbiter modes are active.
-    # Components stay installed, but only branches whose outputs can pass
-    # through at least one arbiter in the current scenario remain relevant.
+    # Compute output-relevant subgraph when arbiter modes are active.
+    # A node is relevant if it can contribute to any observable sink output and
+    # is not cut off by an arbiter in the current scenario.
     mode_relevant_nodes: set[str] | None = None
     if effective_arbiter_modes:
-        mode_relevant_nodes = set()
-        for arbiter_id, arbiter_mode in effective_arbiter_modes.items():
-            if arbiter_id not in graph:
-                continue
-            mode_inputs = graph.nodes[arbiter_id].get("mode_inputs", {})
-            allowed_signal = mode_inputs.get(arbiter_mode)
-            if allowed_signal is None:
-                continue
-            mode_relevant_nodes.update(
-                _compute_mode_relevant_nodes(graph, arbiter_id, [allowed_signal])
-            )
+        mode_relevant_nodes = _compute_output_relevant_nodes(
+            graph,
+            effective_arbiter_modes,
+        )
 
     distances: dict[str, int] = {}
     queue: deque[str] = deque()
