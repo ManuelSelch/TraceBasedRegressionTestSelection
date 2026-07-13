@@ -2,6 +2,9 @@ scenarios:
   - id: lane_following_raw
     description: Lane-following scenario executed from raw camera and localization inputs
     keywords: [lane_raw]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       road_curvature: [low, medium]
       ego_speed_kmh: [30, 70]
@@ -9,6 +12,9 @@ scenarios:
   - id: lane_following_high
     description: Lane-following scenario executed from injected lane boundaries and fused ego pose
     keywords: [lane_high]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       road_curvature: [low, medium]
       ego_speed_kmh: [30, 70]
@@ -16,7 +22,9 @@ scenarios:
   - id: car_following_raw
     description: Car-following scenario executed from raw radar and localization inputs
     keywords: [follow_raw]
-    active_features: [adaptive_cruise_control]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       ego_speed_kmh: [40, 90]
       lead_vehicle_speed_kmh: [20, 80]
@@ -25,7 +33,9 @@ scenarios:
   - id: car_following_high
     description: Car-following scenario executed from injected tracked objects and fused ego pose
     keywords: [follow_high]
-    active_features: [adaptive_cruise_control]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       ego_speed_kmh: [40, 90]
       lead_vehicle_speed_kmh: [20, 80]
@@ -34,6 +44,9 @@ scenarios:
   - id: route_following_raw
     description: Route-following scenario executed from raw localization inputs
     keywords: [route_raw]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       route_length_m: [200, 1000]
       turn_count: [1, 5]
@@ -42,6 +55,9 @@ scenarios:
   - id: route_following_high
     description: Route-following scenario executed from injected fused ego pose
     keywords: [route_high]
+    active_arbiter_modes:
+      steering_arbiter: driving
+      braking_arbiter: driving
     parameters:
       route_length_m: [200, 1000]
       turn_count: [1, 5]
@@ -50,7 +66,9 @@ scenarios:
   - id: parallel_parking_raw
     description: Parking scenario executed from raw camera, ultrasonic, and localization inputs
     keywords: [parking_raw]
-    active_features: [parking]
+    active_arbiter_modes:
+      steering_arbiter: parking
+      braking_arbiter: parking
     parameters:
       slot_length_m: [5, 8]
       initial_speed_kmh: [3, 10]
@@ -59,7 +77,9 @@ scenarios:
   - id: parallel_parking_high
     description: Parking scenario executed from injected parking-slot pose and fused ego pose
     keywords: [parking_high]
-    active_features: [parking]
+    active_arbiter_modes:
+      steering_arbiter: parking
+      braking_arbiter: parking
     parameters:
       slot_length_m: [5, 8]
       initial_speed_kmh: [3, 10]
@@ -74,7 +94,6 @@ scenarios:
   - id: radar_sensor_test
     description: Direct validation of the radar sensor output
     keywords: [radar_sensor]
-    active_features: [adaptive_cruise_control]
     parameters:
       target_distance_m: [20]
 
@@ -93,6 +112,5 @@ scenarios:
   - id: ultrasonic_sensor_test
     description: Direct validation of the ultrasonic sensor output
     keywords: [ultrasonic_sensor]
-    active_features: [parking]
     parameters:
       obstacle_distance_m: [0.5]

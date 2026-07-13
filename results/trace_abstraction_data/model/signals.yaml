@@ -8,7 +8,7 @@ signals:
   - id: radar_detections
     level: sensor
     producer: radar
-    consumers: [acc]
+    consumers: [object_tracker]
     description: Raw radar detections
 
   - id: gps_fix
@@ -32,41 +32,59 @@ signals:
   - id: lane_boundaries
     level: perception
     producer: lane_perception
-    consumers: [local_planner]
+    consumers: [lane_controller]
     description: High-level lane geometry abstraction
 
-  - id: vehicle_distance
+  - id: tracked_objects
     level: perception
-    producer: acc
-    consumers: [local_planner]
+    producer: object_tracker
+    consumers: [acc_controller]
     description: High-level object abstraction
 
   - id: fused_ego_pose
     level: localization
     producer: localization_fusion
-    consumers: [local_planner, parking_planner]
+    consumers: [lane_controller, acc_controller, parking_controller]
     description: High-level ego-pose abstraction
-
-  - id: drive_command
-    level: planning
-    producer: local_planner
-    consumers: [motion_controller]
-    description: Planned normal-driving motion command
 
   - id: parking_slot_pose
     level: perception
     producer: parking_perception
-    consumers: [parking_planner]
+    consumers: [parking_controller]
     description: High-level parking-slot abstraction
 
-  - id: parking_command
-    level: planning
-    producer: parking_planner
-    consumers: [motion_controller]
-    description: Planned parking motion command
-
-  - id: actuator_command
+  - id: lane_steer_cmd
     level: control
-    producer: motion_controller
+    producer: lane_controller
+    consumers: [steering_arbiter]
+    description: Steering command from lane-following controller
+
+  - id: acc_brake_cmd
+    level: control
+    producer: acc_controller
+    consumers: [braking_arbiter]
+    description: Braking command from ACC controller
+
+  - id: parking_steer_cmd
+    level: control
+    producer: parking_controller
+    consumers: [steering_arbiter]
+    description: Steering command from parking controller
+
+  - id: parking_brake_cmd
+    level: control
+    producer: parking_controller
+    consumers: [braking_arbiter]
+    description: Braking command from parking controller
+
+  - id: steer_actuator_cmd
+    level: control
+    producer: steering_arbiter
     consumers: []
-    description: Final actuator command
+    description: Final steering actuator command selected by arbiter
+
+  - id: brake_actuator_cmd
+    level: control
+    producer: braking_arbiter
+    consumers: []
+    description: Final braking actuator command selected by arbiter

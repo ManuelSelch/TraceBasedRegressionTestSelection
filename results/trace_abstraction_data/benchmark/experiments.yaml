@@ -32,6 +32,6 @@ experiments:
       - [camera_image, lane_perception]
 
   - id: omit_radar_to_object_tracker_edge
-    description: Remove the dependency between radar input and object tracking
+    description: Remove the dependency between radar input and object tracker
     removed_edges:
       - [radar_detections, object_tracker]

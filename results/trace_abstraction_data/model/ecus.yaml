@@ -26,7 +26,6 @@ ecus:
   - id: ultrasonic
     type: sensor
     forwards_only: false
-    required_features: [parking]
     description: Provides short-range parking distances
     outputs: [ultrasonic_ranges]
 
@@ -37,10 +36,9 @@ ecus:
     inputs: [camera_image]
     outputs: [lane_boundaries]
 
-  - id: acc
+  - id: object_tracker
     type: processing
     forwards_only: false
-    required_features: [adaptive_cruise_control]
     description: Derives tracked objects from radar input
     inputs: [radar_detections]
     outputs: [tracked_objects]
@@ -52,32 +50,50 @@ ecus:
     inputs: [gps_fix, odometry_delta]
     outputs: [fused_ego_pose]
 
-  - id: local_planner
+  - id: lane_controller
     type: processing
     forwards_only: false
-    description: Plans nominal driving motion from perception and localization inputs
-    inputs: [lane_boundaries, tracked_objects, fused_ego_pose]
-    outputs: [drive_command]
+    description: Computes steering commands for lane-following mode
+    inputs: [lane_boundaries, fused_ego_pose]
+    outputs: [lane_steer_cmd]
+
+  - id: acc_controller
+    type: processing
+    forwards_only: false
+    description: Computes braking commands for adaptive cruise control mode
+    inputs: [tracked_objects, fused_ego_pose]
+    outputs: [acc_brake_cmd]
+
+  - id: parking_controller
+    type: processing
+    forwards_only: false
+    description: Computes steering and braking commands for parking mode
+    inputs: [parking_slot_pose, fused_ego_pose]
+    outputs: [parking_steer_cmd, parking_brake_cmd]
 
   - id: parking_perception
     type: processing
     forwards_only: false
-    required_features: [parking]
     description: Detects a parking slot from camera and ultrasonic input
     inputs: [camera_image, ultrasonic_ranges]
     outputs: [parking_slot_pose]
 
-  - id: parking_planner
-    type: processing
+  - id: steering_arbiter
+    type: arbiter
     forwards_only: false
-    required_features: [parking]
-    description: Plans a parking maneuver from slot pose and ego pose
-    inputs: [parking_slot_pose, fused_ego_pose]
-    outputs: [parking_command]
+    description: Selects the active steering command based on current operating mode
+    inputs: [lane_steer_cmd, parking_steer_cmd]
+    outputs: [steer_actuator_cmd]
+    mode_inputs:
+      driving: lane_steer_cmd
+      parking: parking_steer_cmd
 
-  - id: motion_controller
-    type: processing
+  - id: braking_arbiter
+    type: arbiter
     forwards_only: false
-    description: Converts planner outputs into actuator commands
-    inputs: [drive_command, parking_command]
-    outputs: [actuator_command]
+    description: Selects the active braking command based on current operating mode
+    inputs: [acc_brake_cmd, parking_brake_cmd]
+    outputs: [brake_actuator_cmd]
+    mode_inputs:
+      driving: acc_brake_cmd
+      parking: parking_brake_cmd

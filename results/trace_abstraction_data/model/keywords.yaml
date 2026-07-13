@@ -13,7 +13,7 @@ keywords:
 
   - id: follow_high
     description: Scenario starts from injected tracked objects and fused ego pose
-    initial_signals: [vehicle_distance, fused_ego_pose]
+    initial_signals: [tracked_objects, fused_ego_pose]
 
   - id: route_raw
     description: Scenario starts from raw localization inputs
