@@ -175,9 +175,6 @@ def generate_keyword_trace(
     initial_ecus = list(keyword.get("initial_ecus", []))
     initial_signals = list(keyword.get("initial_signals", []))
 
-    if not initial_ecus and not initial_signals:
-        raise ValueError(f"Keyword '{keyword_id}' has no initial ECUs or signals")
-
     normalized_active_features = set(active_features) if active_features is not None else None
     normalized_enabled_features = (
         set(enabled_features) if enabled_features is not None else None
