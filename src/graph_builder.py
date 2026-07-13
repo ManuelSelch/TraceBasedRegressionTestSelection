@@ -48,6 +48,7 @@ def _add_ecu_nodes(graph: nx.DiGraph, ecus: list[dict[str, Any]]) -> None:
             inputs=list(ecu.get("inputs", [])),
             outputs=list(ecu.get("outputs", [])),
             required_features=list(ecu.get("required_features", [])),
+            mode_inputs=dict(ecu.get("mode_inputs", {})),
         )
 
 
@@ -110,12 +111,58 @@ def _is_ecu_active(
     return True
 
 
+def _find_arbiter(graph: nx.DiGraph) -> str | None:
+    """Find the first arbiter ECU in the graph."""
+    for node, attrs in graph.nodes(data=True):
+        if attrs.get("ecu_type") == "arbiter":
+            return node
+    return None
+
+
+def _compute_mode_relevant_nodes(
+    graph: nx.DiGraph,
+    arbiter_id: str,
+    allowed_signals: list[str],
+) -> set[str]:
+    """Compute the set of ECUs and signals that can reach the arbiter
+    through one of the allowed input signals in the current mode.
+
+    Uses reverse BFS from the allowed arbiter input signals. Returns a set
+    containing all ECUs and signals that contribute to the arbiter output
+    in that mode, plus the arbiter itself and its outputs.
+    """
+    relevant: set[str] = set()
+    queue: deque[str] = deque()
+
+    for signal_id in allowed_signals:
+        if signal_id in graph:
+            queue.append(signal_id)
+            relevant.add(signal_id)
+
+    if arbiter_id in graph:
+        relevant.add(arbiter_id)
+        for successor in graph.successors(arbiter_id):
+            relevant.add(successor)
+
+    while queue:
+        current = queue.popleft()
+        if current not in graph:
+            continue
+        for predecessor in graph.predecessors(current):
+            if predecessor not in relevant:
+                relevant.add(predecessor)
+                queue.append(predecessor)
+
+    return relevant
+
+
 def generate_keyword_trace(
     graph: nx.DiGraph,
     keyword: dict[str, Any],
     active_features: list[str] | set[str] | None = None,
     enabled_features: list[str] | set[str] | None = None,
     allow_missing_initial_nodes: bool = False,
+    active_mode: str | None = None,
 ) -> dict[str, Any]:
     keyword_id = keyword["id"]
     initial_ecus = list(keyword.get("initial_ecus", []))
@@ -162,6 +209,23 @@ def generate_keyword_trace(
             )
         valid_initial_signals.append(signal_id)
 
+    # Compute mode-relevant subgraph when a mode is active.
+    # Only ECUs and signals that can reach the arbiter through the allowed
+    # input in the current mode are traversed. This implements the semantics
+    # of "always installed, conditionally active": components are always
+    # present, but the arbiter blocks the output of branches that are not
+    # selected in the current mode, so those branches cannot influence the
+    # system behaviour and must be excluded from the trace.
+    mode_relevant_nodes: set[str] | None = None
+    if active_mode is not None:
+        arbiter_id = _find_arbiter(graph)
+        if arbiter_id is not None:
+            mode_inputs = graph.nodes[arbiter_id].get("mode_inputs", {})
+            allowed_inputs = [sig for mode, sig in mode_inputs.items() if mode == active_mode]
+            mode_relevant_nodes = _compute_mode_relevant_nodes(
+                graph, arbiter_id, allowed_inputs
+            )
+
     distances: dict[str, int] = {}
     queue: deque[str] = deque()
 
@@ -173,19 +237,36 @@ def generate_keyword_trace(
             normalized_enabled_features,
         ):
             continue
+        if mode_relevant_nodes is not None and ecu_id not in mode_relevant_nodes:
+            continue
 
         distances[ecu_id] = 0
         queue.append(ecu_id)
 
     for signal_id in valid_initial_signals:
+        if mode_relevant_nodes is not None and signal_id not in mode_relevant_nodes:
+            continue
         distances[signal_id] = 0
         queue.append(signal_id)
+        # Include producer ECU so sensor/component changes are caught
+        producer = graph.nodes[signal_id].get("producer")
+        if (
+            producer
+            and producer in graph
+            and graph.nodes[producer].get("kind") == ECU_KIND
+            and (mode_relevant_nodes is None or producer in mode_relevant_nodes)
+            and producer not in distances
+        ):
+            distances[producer] = 0
+            queue.append(producer)
 
     while queue:
         node_id = queue.popleft()
         current_distance = distances[node_id]
 
         for successor_id in graph.successors(node_id):
+            if mode_relevant_nodes is not None and successor_id not in mode_relevant_nodes:
+                continue
             if graph.nodes[successor_id].get("kind") == ECU_KIND and not _is_ecu_active(
                 graph,
                 successor_id,
@@ -235,6 +316,7 @@ def generate_keyword_trace(
         "missing_initial_ecus": sorted(missing_initial_ecus),
         "missing_initial_signals": sorted(missing_initial_signals),
         "active_features": sorted(normalized_active_features or []),
+        "active_mode": active_mode,
         "enabled_features": sorted(normalized_enabled_features or []),
         "direct_ecus": direct_ecus,
         "indirect_ecus": indirect_ecus,
@@ -250,6 +332,7 @@ def generate_all_keyword_traces(
     active_features: list[str] | set[str] | None = None,
     enabled_features: list[str] | set[str] | None = None,
     allow_missing_initial_nodes: bool = False,
+    active_mode: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     return {
         keyword["id"]: generate_keyword_trace(
@@ -258,6 +341,7 @@ def generate_all_keyword_traces(
             active_features=active_features,
             enabled_features=enabled_features,
             allow_missing_initial_nodes=allow_missing_initial_nodes,
+            active_mode=active_mode,
         )
         for keyword in keywords
     }
