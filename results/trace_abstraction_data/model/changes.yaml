@@ -23,8 +23,8 @@ changes:
     changed_ecus: [lane_perception]
     description: Lane-perception logic changed
 
-  - id: object_tracker
-    changed_ecus: [object_tracker]
+  - id: acc
+    changed_ecus: [acc]
     description: Object-tracking logic changed
 
   - id: localization_fusion

@@ -8,7 +8,7 @@ signals:
   - id: radar_detections
     level: sensor
     producer: radar
-    consumers: [object_tracker]
+    consumers: [acc]
     description: Raw radar detections
 
   - id: gps_fix
@@ -35,9 +35,9 @@ signals:
     consumers: [local_planner]
     description: High-level lane geometry abstraction
 
-  - id: tracked_objects
+  - id: vehicle_distance
     level: perception
-    producer: object_tracker
+    producer: acc
     consumers: [local_planner]
     description: High-level object abstraction
 

@@ -37,7 +37,7 @@ ecus:
     inputs: [camera_image]
     outputs: [lane_boundaries]
 
-  - id: object_tracker
+  - id: acc
     type: processing
     forwards_only: false
     required_features: [adaptive_cruise_control]
