@@ -74,6 +74,7 @@ scenarios:
   - id: radar_sensor_test
     description: Direct validation of the radar sensor output
     keywords: [radar_sensor]
+    active_features: [adaptive_cruise_control]
     parameters:
       target_distance_m: [20]
 
