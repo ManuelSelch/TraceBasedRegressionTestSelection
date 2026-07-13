@@ -111,12 +111,12 @@ def _is_ecu_active(
     return True
 
 
-def _find_arbiter(graph: nx.DiGraph) -> str | None:
-    """Find the first arbiter ECU in the graph."""
-    for node, attrs in graph.nodes(data=True):
-        if attrs.get("ecu_type") == "arbiter":
-            return node
-    return None
+def _find_arbiters(graph: nx.DiGraph) -> list[str]:
+    return sorted(
+        node
+        for node, attrs in graph.nodes(data=True)
+        if attrs.get("ecu_type") == "arbiter"
+    )
 
 
 def _compute_mode_relevant_nodes(
@@ -163,6 +163,7 @@ def generate_keyword_trace(
     enabled_features: list[str] | set[str] | None = None,
     allow_missing_initial_nodes: bool = False,
     active_mode: str | None = None,
+    active_arbiter_modes: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     keyword_id = keyword["id"]
     initial_ecus = list(keyword.get("initial_ecus", []))
@@ -209,21 +210,26 @@ def generate_keyword_trace(
             )
         valid_initial_signals.append(signal_id)
 
-    # Compute mode-relevant subgraph when a mode is active.
-    # Only ECUs and signals that can reach the arbiter through the allowed
-    # input in the current mode are traversed. This implements the semantics
-    # of "always installed, conditionally active": components are always
-    # present, but the arbiter blocks the output of branches that are not
-    # selected in the current mode, so those branches cannot influence the
-    # system behaviour and must be excluded from the trace.
-    mode_relevant_nodes: set[str] | None = None
+    effective_arbiter_modes = dict(active_arbiter_modes or {})
     if active_mode is not None:
-        arbiter_id = _find_arbiter(graph)
-        if arbiter_id is not None:
+        for arbiter_id in _find_arbiters(graph):
+            effective_arbiter_modes.setdefault(arbiter_id, active_mode)
+
+    # Compute mode-relevant subgraph when arbiter modes are active.
+    # Components stay installed, but only branches whose outputs can pass
+    # through at least one arbiter in the current scenario remain relevant.
+    mode_relevant_nodes: set[str] | None = None
+    if effective_arbiter_modes:
+        mode_relevant_nodes = set()
+        for arbiter_id, arbiter_mode in effective_arbiter_modes.items():
+            if arbiter_id not in graph:
+                continue
             mode_inputs = graph.nodes[arbiter_id].get("mode_inputs", {})
-            allowed_inputs = [sig for mode, sig in mode_inputs.items() if mode == active_mode]
-            mode_relevant_nodes = _compute_mode_relevant_nodes(
-                graph, arbiter_id, allowed_inputs
+            allowed_signal = mode_inputs.get(arbiter_mode)
+            if allowed_signal is None:
+                continue
+            mode_relevant_nodes.update(
+                _compute_mode_relevant_nodes(graph, arbiter_id, [allowed_signal])
             )
 
     distances: dict[str, int] = {}
@@ -317,6 +323,7 @@ def generate_keyword_trace(
         "missing_initial_signals": sorted(missing_initial_signals),
         "active_features": sorted(normalized_active_features or []),
         "active_mode": active_mode,
+        "active_arbiter_modes": dict(sorted(effective_arbiter_modes.items())),
         "enabled_features": sorted(normalized_enabled_features or []),
         "direct_ecus": direct_ecus,
         "indirect_ecus": indirect_ecus,
@@ -333,6 +340,7 @@ def generate_all_keyword_traces(
     enabled_features: list[str] | set[str] | None = None,
     allow_missing_initial_nodes: bool = False,
     active_mode: str | None = None,
+    active_arbiter_modes: dict[str, str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     return {
         keyword["id"]: generate_keyword_trace(
@@ -342,6 +350,7 @@ def generate_all_keyword_traces(
             enabled_features=enabled_features,
             allow_missing_initial_nodes=allow_missing_initial_nodes,
             active_mode=active_mode,
+            active_arbiter_modes=active_arbiter_modes,
         )
         for keyword in keywords
     }

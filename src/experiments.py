@@ -59,6 +59,7 @@ def run_selection_pipeline(
             active_features=scenario.get("active_features", []),
             allow_missing_initial_nodes=experiment is not None,
             active_mode=scenario.get("active_mode"),
+            active_arbiter_modes=scenario.get("active_arbiter_modes"),
         )
         for scenario in scenarios
     }
