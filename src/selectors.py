@@ -55,12 +55,19 @@ def select_test_cases_for_change(
     changed_ecus = set(change.get("changed_ecus", []))
     selected_test_cases: list[str] = []
     selected_logical_scenarios: set[str] = set()
+    all_logical_scenarios = {
+        trace["logical_scenario"]
+        for trace in test_case_traces.values()
+    }
 
     for test_case_id, trace in test_case_traces.items():
         if changed_ecus.intersection(trace["reached_ecus"]):
             selected_test_cases.append(test_case_id)
             selected_logical_scenarios.add(trace["logical_scenario"])
 
+    excluded_logical_scenarios = sorted(
+        all_logical_scenarios - selected_logical_scenarios
+    )
     all_test_cases = len(test_case_traces)
     selected_count = len(selected_test_cases)
     reduction_rate = 1.0 - (selected_count / all_test_cases) if all_test_cases else 0.0
@@ -70,6 +77,7 @@ def select_test_cases_for_change(
         "changed_ecus": sorted(changed_ecus),
         "selected_test_cases": sorted(selected_test_cases),
         "selected_logical_scenarios": sorted(selected_logical_scenarios),
+        "excluded_logical_scenarios": excluded_logical_scenarios,
         "selected_count": selected_count,
         "all_test_cases": all_test_cases,
         "reduction_rate": reduction_rate,
