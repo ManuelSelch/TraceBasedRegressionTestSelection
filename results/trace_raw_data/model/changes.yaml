@@ -47,6 +47,10 @@ changes:
     changed_ecus: [parking_perception]
     description: Parking-slot perception logic changed
 
+  - id: dashboard_controller
+    changed_ecus: [dashboard_controller]
+    description: Dashboard display logic changed
+
   - id: steering_arbiter
     changed_ecus: [steering_arbiter]
     description: Steering arbiter logic changed

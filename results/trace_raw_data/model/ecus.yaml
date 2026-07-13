@@ -78,6 +78,13 @@ ecus:
     inputs: [camera_image, ultrasonic_ranges]
     outputs: [parking_slot_pose]
 
+  - id: dashboard_controller
+    type: display
+    forwards_only: false
+    description: Displays navigation and assistance information to the driver
+    inputs: [fused_ego_pose, lane_boundaries, tracked_objects]
+    outputs: [dashboard_state]
+
   - id: steering_arbiter
     type: arbiter
     forwards_only: false

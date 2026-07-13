@@ -85,6 +85,14 @@ scenarios:
       initial_speed_kmh: [3, 10]
       lateral_offset_m: [0.2, 1.0]
 
+  - id: dashboard_display
+    description: Dashboard scenario executed from injected localization, lane, and object state
+    keywords: [dashboard_high, all_sensors]
+    parameters:
+      ego_speed_kmh: [30, 90]
+      traffic_density: [low, medium]
+      route_progress_percent: [10, 80]
+
   - id: camera_sensor_test
     description: Direct validation of the camera sensor output
     keywords: [camera_sensor, all_sensors]

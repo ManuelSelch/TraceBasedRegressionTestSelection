@@ -32,19 +32,19 @@ signals:
   - id: lane_boundaries
     level: perception
     producer: lane_perception
-    consumers: [lane_controller]
+    consumers: [lane_controller, dashboard_controller]
     description: High-level lane geometry abstraction
 
   - id: tracked_objects
     level: perception
     producer: object_tracker
-    consumers: [acc_controller]
+    consumers: [acc_controller, dashboard_controller]
     description: High-level object abstraction
 
   - id: fused_ego_pose
     level: localization
     producer: localization_fusion
-    consumers: [lane_controller, acc_controller, parking_controller]
+    consumers: [lane_controller, acc_controller, parking_controller, dashboard_controller]
     description: High-level ego-pose abstraction
 
   - id: parking_slot_pose
@@ -76,6 +76,12 @@ signals:
     producer: parking_controller
     consumers: [braking_arbiter]
     description: Braking command from parking controller
+
+  - id: dashboard_state
+    level: hmi
+    producer: dashboard_controller
+    consumers: []
+    description: Rendered dashboard state for the driver
 
   - id: steer_actuator_cmd
     level: control

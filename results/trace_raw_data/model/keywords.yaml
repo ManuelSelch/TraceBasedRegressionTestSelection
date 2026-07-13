@@ -31,6 +31,10 @@ keywords:
     description: Scenario starts from injected parking-slot pose and fused ego pose
     initial_signals: [parking_slot_pose, fused_ego_pose]
 
+  - id: dashboard_high
+    description: Scenario starts from injected dashboard-relevant high-level signals
+    initial_signals: [fused_ego_pose, lane_boundaries, tracked_objects]
+
   - id: camera_sensor
     description: Direct sensor test for the camera
     initial_ecus: [camera]

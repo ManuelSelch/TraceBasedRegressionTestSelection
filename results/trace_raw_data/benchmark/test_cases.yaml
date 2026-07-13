@@ -108,26 +108,40 @@ test_cases:
       lateral_offset_m: 0.8
 
   - id: TC017
+    logical_scenario: dashboard_display
+    seed_parameters:
+      ego_speed_kmh: 45
+      traffic_density: low
+      route_progress_percent: 20
+
+  - id: TC018
+    logical_scenario: dashboard_display
+    seed_parameters:
+      ego_speed_kmh: 80
+      traffic_density: medium
+      route_progress_percent: 70
+
+  - id: TC019
     logical_scenario: camera_sensor_test
     seed_parameters:
       illumination: normal
 
-  - id: TC018
+  - id: TC020
     logical_scenario: radar_sensor_test
     seed_parameters:
       target_distance_m: 20
 
-  - id: TC019
+  - id: TC021
     logical_scenario: gps_sensor_test
     seed_parameters:
       satellite_visibility: good
 
-  - id: TC020
+  - id: TC022
     logical_scenario: odometry_sensor_test
     seed_parameters:
       wheel_slip: low
 
-  - id: TC021
+  - id: TC023
     logical_scenario: ultrasonic_sensor_test
     seed_parameters:
       obstacle_distance_m: 0.5
