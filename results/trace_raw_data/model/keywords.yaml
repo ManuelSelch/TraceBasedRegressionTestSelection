@@ -1,0 +1,20 @@
+keywords:
+  - id: camera_sensor
+    description: Direct sensor test for the camera
+    initial_ecus: [camera]
+
+  - id: radar_sensor
+    description: Direct sensor test for the radar
+    initial_ecus: [radar]
+
+  - id: gps_sensor
+    description: Direct sensor test for the GPS
+    initial_ecus: [gps]
+
+  - id: odometry_sensor
+    description: Direct sensor test for odometry
+    initial_ecus: [odometry]
+
+  - id: ultrasonic_sensor
+    description: Direct sensor test for the ultrasonic sensor
+    initial_ecus: [ultrasonic]

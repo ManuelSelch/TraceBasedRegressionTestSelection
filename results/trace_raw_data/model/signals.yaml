@@ -1,0 +1,72 @@
+signals:
+  - id: camera_image
+    level: sensor
+    producer: camera
+    consumers: [lane_perception, parking_perception]
+    description: Raw camera image
+
+  - id: radar_detections
+    level: sensor
+    producer: radar
+    consumers: [acc]
+    description: Raw radar detections
+
+  - id: gps_fix
+    level: sensor
+    producer: gps
+    consumers: [localization_fusion]
+    description: Raw GPS fix
+
+  - id: odometry_delta
+    level: sensor
+    producer: odometry
+    consumers: [localization_fusion]
+    description: Raw odometry increment
+
+  - id: ultrasonic_ranges
+    level: sensor
+    producer: ultrasonic
+    consumers: [parking_perception]
+    description: Raw ultrasonic distances
+
+  - id: lane_boundaries
+    level: perception
+    producer: lane_perception
+    consumers: [local_planner]
+    description: High-level lane geometry abstraction
+
+  - id: vehicle_distance
+    level: perception
+    producer: acc
+    consumers: [local_planner]
+    description: High-level object abstraction
+
+  - id: fused_ego_pose
+    level: localization
+    producer: localization_fusion
+    consumers: [local_planner, parking_planner]
+    description: High-level ego-pose abstraction
+
+  - id: drive_command
+    level: planning
+    producer: local_planner
+    consumers: [motion_controller]
+    description: Planned normal-driving motion command
+
+  - id: parking_slot_pose
+    level: perception
+    producer: parking_perception
+    consumers: [parking_planner]
+    description: High-level parking-slot abstraction
+
+  - id: parking_command
+    level: planning
+    producer: parking_planner
+    consumers: [motion_controller]
+    description: Planned parking motion command
+
+  - id: actuator_command
+    level: control
+    producer: motion_controller
+    consumers: []
+    description: Final actuator command

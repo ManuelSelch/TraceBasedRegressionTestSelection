@@ -1,0 +1,37 @@
+experiments:
+  - id: baseline_complete_model
+    description: Use the complete reduced model as ground truth
+
+  - id: omit_camera_image
+    description: Remove the raw camera signal from the model
+    removed_signals: [camera_image]
+
+  - id: omit_radar_detections
+    description: Remove the raw radar signal from the model
+    removed_signals: [radar_detections]
+
+  - id: omit_fused_ego_pose
+    description: Remove the injected high-level localization signal from the model
+    removed_signals: [fused_ego_pose]
+
+  - id: omit_lane_boundaries
+    description: Remove the injected high-level lane signal from the model
+    removed_signals: [lane_boundaries]
+
+  - id: omit_tracked_objects
+    description: Remove the injected high-level object signal from the model
+    removed_signals: [tracked_objects]
+
+  - id: omit_parking_slot_pose
+    description: Remove the injected high-level parking signal from the model
+    removed_signals: [parking_slot_pose]
+
+  - id: omit_camera_to_lane_perception_edge
+    description: Remove the dependency between camera input and lane perception
+    removed_edges:
+      - [camera_image, lane_perception]
+
+  - id: omit_radar_to_object_tracker_edge
+    description: Remove the dependency between radar input and object tracking
+    removed_edges:
+      - [radar_detections, object_tracker]

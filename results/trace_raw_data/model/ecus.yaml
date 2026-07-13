@@ -1,0 +1,83 @@
+ecus:
+  - id: camera
+    type: sensor
+    forwards_only: false
+    description: Captures raw front-camera data
+    outputs: [camera_image]
+
+  - id: radar
+    type: sensor
+    forwards_only: false
+    description: Captures raw radar detections
+    outputs: [radar_detections]
+
+  - id: gps
+    type: sensor
+    forwards_only: false
+    description: Provides raw global position fixes
+    outputs: [gps_fix]
+
+  - id: odometry
+    type: sensor
+    forwards_only: false
+    description: Provides raw incremental ego-motion estimates
+    outputs: [odometry_delta]
+
+  - id: ultrasonic
+    type: sensor
+    forwards_only: false
+    required_features: [parking]
+    description: Provides short-range parking distances
+    outputs: [ultrasonic_ranges]
+
+  - id: lane_perception
+    type: processing
+    forwards_only: false
+    description: Derives lane boundaries from camera input
+    inputs: [camera_image]
+    outputs: [lane_boundaries]
+
+  - id: acc
+    type: processing
+    forwards_only: false
+    required_features: [adaptive_cruise_control]
+    description: Derives tracked objects from radar input
+    inputs: [radar_detections]
+    outputs: [tracked_objects]
+
+  - id: localization_fusion
+    type: processing
+    forwards_only: false
+    description: Fuses GPS and odometry into an ego-pose estimate
+    inputs: [gps_fix, odometry_delta]
+    outputs: [fused_ego_pose]
+
+  - id: local_planner
+    type: processing
+    forwards_only: false
+    description: Plans nominal driving motion from perception and localization inputs
+    inputs: [lane_boundaries, tracked_objects, fused_ego_pose]
+    outputs: [drive_command]
+
+  - id: parking_perception
+    type: processing
+    forwards_only: false
+    required_features: [parking]
+    description: Detects a parking slot from camera and ultrasonic input
+    inputs: [camera_image, ultrasonic_ranges]
+    outputs: [parking_slot_pose]
+
+  - id: parking_planner
+    type: processing
+    forwards_only: false
+    required_features: [parking]
+    description: Plans a parking maneuver from slot pose and ego pose
+    inputs: [parking_slot_pose, fused_ego_pose]
+    outputs: [parking_command]
+
+  - id: motion_controller
+    type: processing
+    forwards_only: false
+    description: Converts planner outputs into actuator commands
+    inputs: [drive_command, parking_command]
+    outputs: [actuator_command]
