@@ -57,6 +57,7 @@ def run_selection_pipeline(
             function_web,
             keywords,
             active_features=scenario.get("active_features", []),
+            allow_missing_initial_nodes=experiment is not None,
         )
         for scenario in scenarios
     }

@@ -115,20 +115,30 @@ def generate_keyword_trace(
     keyword: dict[str, Any],
     active_features: list[str] | set[str] | None = None,
     enabled_features: list[str] | set[str] | None = None,
+    allow_missing_initial_nodes: bool = False,
 ) -> dict[str, Any]:
     keyword_id = keyword["id"]
     initial_ecus = list(keyword.get("initial_ecus", []))
+    initial_signals = list(keyword.get("initial_signals", []))
 
-    if not initial_ecus:
-        raise ValueError(f"Keyword '{keyword_id}' has no initial ECUs")
+    if not initial_ecus and not initial_signals:
+        raise ValueError(f"Keyword '{keyword_id}' has no initial ECUs or signals")
 
     normalized_active_features = set(active_features) if active_features is not None else None
     normalized_enabled_features = (
         set(enabled_features) if enabled_features is not None else None
     )
 
+    valid_initial_ecus: list[str] = []
+    valid_initial_signals: list[str] = []
+    missing_initial_ecus: list[str] = []
+    missing_initial_signals: list[str] = []
+
     for ecu_id in initial_ecus:
         if ecu_id not in graph:
+            if allow_missing_initial_nodes:
+                missing_initial_ecus.append(ecu_id)
+                continue
             raise ValueError(
                 f"Keyword '{keyword_id}' references unknown initial ECU '{ecu_id}'"
             )
@@ -136,11 +146,26 @@ def generate_keyword_trace(
             raise ValueError(
                 f"Keyword '{keyword_id}' initial node '{ecu_id}' is not an ECU"
             )
+        valid_initial_ecus.append(ecu_id)
+
+    for signal_id in initial_signals:
+        if signal_id not in graph:
+            if allow_missing_initial_nodes:
+                missing_initial_signals.append(signal_id)
+                continue
+            raise ValueError(
+                f"Keyword '{keyword_id}' references unknown initial signal '{signal_id}'"
+            )
+        if graph.nodes[signal_id].get("kind") != SIGNAL_KIND:
+            raise ValueError(
+                f"Keyword '{keyword_id}' initial node '{signal_id}' is not a signal"
+            )
+        valid_initial_signals.append(signal_id)
 
     distances: dict[str, int] = {}
     queue: deque[str] = deque()
 
-    for ecu_id in initial_ecus:
+    for ecu_id in valid_initial_ecus:
         if not _is_ecu_active(
             graph,
             ecu_id,
@@ -151,6 +176,10 @@ def generate_keyword_trace(
 
         distances[ecu_id] = 0
         queue.append(ecu_id)
+
+    for signal_id in valid_initial_signals:
+        distances[signal_id] = 0
+        queue.append(signal_id)
 
     while queue:
         node_id = queue.popleft()
@@ -201,7 +230,10 @@ def generate_keyword_trace(
 
     return {
         "keyword": keyword_id,
-        "initial_ecus": sorted(initial_ecus),
+        "initial_ecus": sorted(valid_initial_ecus),
+        "initial_signals": sorted(valid_initial_signals),
+        "missing_initial_ecus": sorted(missing_initial_ecus),
+        "missing_initial_signals": sorted(missing_initial_signals),
         "active_features": sorted(normalized_active_features or []),
         "enabled_features": sorted(normalized_enabled_features or []),
         "direct_ecus": direct_ecus,
@@ -217,6 +249,7 @@ def generate_all_keyword_traces(
     keywords: list[dict[str, Any]],
     active_features: list[str] | set[str] | None = None,
     enabled_features: list[str] | set[str] | None = None,
+    allow_missing_initial_nodes: bool = False,
 ) -> dict[str, dict[str, Any]]:
     return {
         keyword["id"]: generate_keyword_trace(
@@ -224,6 +257,7 @@ def generate_all_keyword_traces(
             keyword,
             active_features=active_features,
             enabled_features=enabled_features,
+            allow_missing_initial_nodes=allow_missing_initial_nodes,
         )
         for keyword in keywords
     }
