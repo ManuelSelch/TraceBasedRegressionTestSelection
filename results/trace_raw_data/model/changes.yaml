@@ -31,18 +31,26 @@ changes:
     changed_ecus: [localization_fusion]
     description: Localization-fusion logic changed
 
-  - id: local_planner
-    changed_ecus: [local_planner]
-    description: Driving planner logic changed
+  - id: lane_controller
+    changed_ecus: [lane_controller]
+    description: Lane-following steering controller logic changed
+
+  - id: acc_controller
+    changed_ecus: [acc_controller]
+    description: ACC braking controller logic changed
+
+  - id: parking_controller
+    changed_ecus: [parking_controller]
+    description: Parking controller logic changed
 
   - id: parking_perception
     changed_ecus: [parking_perception]
     description: Parking-slot perception logic changed
 
-  - id: parking_planner
-    changed_ecus: [parking_planner]
-    description: Parking-planner logic changed
+  - id: steering_arbiter
+    changed_ecus: [steering_arbiter]
+    description: Steering arbiter logic changed
 
-  - id: motion_controller
-    changed_ecus: [motion_controller]
-    description: Motion-controller logic changed
+  - id: braking_arbiter
+    changed_ecus: [braking_arbiter]
+    description: Braking arbiter logic changed

@@ -1,4 +1,36 @@
 keywords:
+  - id: lane_raw
+    description: Scenario starts from raw camera and raw localization inputs
+    initial_signals: [camera_image, gps_fix, odometry_delta]
+
+  - id: lane_high
+    description: Scenario starts from injected lane boundaries and fused ego pose
+    initial_signals: [lane_boundaries, fused_ego_pose]
+
+  - id: follow_raw
+    description: Scenario starts from raw radar and raw localization inputs
+    initial_signals: [radar_detections, gps_fix, odometry_delta]
+
+  - id: follow_high
+    description: Scenario starts from injected tracked objects and fused ego pose
+    initial_signals: [tracked_objects, fused_ego_pose]
+
+  - id: route_raw
+    description: Scenario starts from raw localization inputs
+    initial_signals: [gps_fix, odometry_delta]
+
+  - id: route_high
+    description: Scenario starts from injected fused ego pose
+    initial_signals: [fused_ego_pose]
+
+  - id: parking_raw
+    description: Scenario starts from raw parking and localization inputs
+    initial_signals: [camera_image, ultrasonic_ranges, gps_fix, odometry_delta]
+
+  - id: parking_high
+    description: Scenario starts from injected parking-slot pose and fused ego pose
+    initial_signals: [parking_slot_pose, fused_ego_pose]
+
   - id: camera_sensor
     description: Direct sensor test for the camera
     initial_ecus: [camera]
@@ -18,3 +50,7 @@ keywords:
   - id: ultrasonic_sensor
     description: Direct sensor test for the ultrasonic sensor
     initial_ecus: [ultrasonic]
+
+  - id: all_sensors
+    description: E2E test uses all all sensors
+    initial_ecus: [camera, radar, gps, odometry, ultrasonic]
